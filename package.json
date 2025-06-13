@@ -1,31 +1,15 @@
 {
   "name": "pvq-sdk",
-  "type": "module",
-  "devDependencies": {
-    "@types/bun": "latest",
-    "esbuild": "^0.25.2",
-    "prettier": "^3.5.3"
-  },
-  "main": "dist/cjs/index.js",
-  "module": "dist/esm/index.js",
-  "types": "dist/types/index.d.ts",
-  "exports": {
-    "require": "./dist/cjs/index.js",
-    "import": "./dist/esm/index.js"
-  },
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
   "scripts": {
-    "test": "bun test",
-    "build": "bun run build:js && bun run build:types",
-    "build:js": "bun run build.cjs",
-    "build:types": "tsc -p tsconfig.types.json"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "peerDependencies": {
-    "typescript": "^5.0.0"
-  },
-  "dependencies": {
-    "@polkadot/api": "^15.9.2",
-    "@polkadot/types": "^15.9.2",
-    "@polkadot/types-codec": "^15.9.2",
-    "@polkadot/util": "^13.4.4"
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "turbo": "^2.5.4"
   }
 }
