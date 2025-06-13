@@ -1,2 +1,4 @@
 console.log("Hello via Bun!");
-export const a = 1
+export const hello = (name: string) => {
+  return `Hello, ${name}`;
+}
