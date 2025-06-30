@@ -30,29 +30,31 @@ export class PvqProgram {
   public registry: ProgramRegistry;
   public api: ApiBase<ApiTypes>;
   public guestProgram: Bytes;
-  private _entrypoint: Record<string, (params: unknown[]) => Uint8Array>;
+  private _entrypoints: Record<string, (params: unknown[], options?: ExecuteQueryOptions) => Promise<unknown>>;
 
   constructor(api: ApiBase<ApiTypes>, guestProgram: Uint8Array | `0x${string}`, programMetadata: Record<string, unknown> | ProgramMetadata) {
     this.api = api;
     this.registry = new ProgramRegistry(programMetadata);
-    this._entrypoint = this.createEntrypointMap();
+    this._entrypoints = this.createEntrypointMap();
     this.guestProgram = this.registry.registry.createType('Bytes', guestProgram);
   }
 
 
-  private createEntrypointMap(): Record<string, (params: unknown[]) => Uint8Array> {
+  private createEntrypointMap(): Record<string, (params: unknown[], options?: ExecuteQueryOptions) => Promise<unknown>> {
     const entrypoints = this.registry.entrypoints;
-    const entrypointMap: Record<string, (params: unknown[]) => Uint8Array> = {};
+    const entrypointMap: Record<string, (params: unknown[], options?: ExecuteQueryOptions) => Promise<unknown>> = {};
 
     for (const entrypoint of entrypoints) {
       const camelCaseName = toCamelCase(entrypoint.identifier);
-      entrypointMap[camelCaseName] = entrypoint.toU8a;
+      entrypointMap[camelCaseName] = (params: unknown[], { gasLimit = undefined }: ExecuteQueryOptions = {}) => {
+        return this.executeQuery(entrypoint.identifier, { gasLimit }, params);
+      };
     }
 
     return entrypointMap;
   }
 
-  public async executeQuery(entrypoint: string | Entrypoint, { gasLimit = undefined }: ExecuteQueryOptions, params: unknown[]) {
+  public async executeQuery(entrypoint: string | Entrypoint, { gasLimit = undefined }: ExecuteQueryOptions = {}, params: unknown[]) {
     const result = await firstValueFrom(
       this.api.rx.call.pvqApi.executeQuery(
         this.guestProgram.toU8a(),
@@ -81,7 +83,7 @@ export class PvqProgram {
   }
 
   get entrypoint() {
-    return this._entrypoint;
+    return this._entrypoints;
   }
 
   async metadata() {

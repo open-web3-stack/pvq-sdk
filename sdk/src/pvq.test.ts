@@ -30,22 +30,6 @@ describe('PvqProgram', () => {
     expect(typeof program.entrypoint.sumBalance).toBe('function');
   });
 
-  test('should encode parameters using entrypoint method', () => {
-    const params = [123, [new Uint8Array(32).fill(1)]];
-    const encoded = program.entrypoint.sumBalance(params);
-
-    console.log(u8aToHex(encoded));
-    expect(encoded).toBeInstanceOf(Uint8Array);
-    expect(encoded.length).toBeGreaterThan(0);
-  });
-
-  test('should throw error when parameter count mismatch', () => {
-    const params = [123]; // Only one parameter instead of two
-    expect(() => {
-      program.entrypoint.sumBalance(params);
-    }).toThrow('Expected 2 parameters, but got 1');
-  });
-
   test('should fetch metadata from chain', async () => {
     const provider = new WsProvider('ws://127.0.0.1:8000');
     const api = await ApiPromise.create({ provider });
@@ -62,7 +46,6 @@ describe('PvqProgram', () => {
     const api = await ApiPromise.create({ provider });
     const program = new PvqProgram(api, guestProgram, sampleMetadata);
     const metadata = await program.metadata();
-    console.log(metadata);
     expect(metadata).toBeDefined();
     await api.disconnect();
   });
@@ -107,6 +90,32 @@ describe('PvqProgram', () => {
     const program = new PvqProgram(api, guestProgram, sampleMetadata);
     const result = await program.executeQuery('sum_balance', { gasLimit: gas_limit }, [21, ['15oF4uVJwmo4TdGW7VfQxNLavjCXviqxT9S1MgbjMNHr6Sp5']]);
     console.log('result', result);
+    expect(result).toBeDefined();
+    await api.disconnect();
+  });
+
+  test('sum_balance', async () => {
+    const guestPath = path.resolve(__dirname, './guests/guest-sum-balance.polkavm');
+    const guestProgram = u8aToHex(fs.readFileSync(guestPath));
+    const gas_limit = undefined;
+
+    const provider = new WsProvider('ws://127.0.0.1:8000');
+    const api = await ApiPromise.create({ provider });
+    const program = new PvqProgram(api, guestProgram, sampleMetadata);
+    const result = await program.entrypoint.sumBalance([21, ['15oF4uVJwmo4TdGW7VfQxNLavjCXviqxT9S1MgbjMNHr6Sp5']]);
+    expect(result).toBeDefined();
+    await api.disconnect();
+  });
+
+  test('gas_limit', async () => {
+    const guestPath = path.resolve(__dirname, './guests/guest-sum-balance.polkavm');
+    const guestProgram = u8aToHex(fs.readFileSync(guestPath));
+    const gas_limit = undefined;
+
+    const provider = new WsProvider('ws://127.0.0.1:8000');
+    const api = await ApiPromise.create({ provider });
+    const program = new PvqProgram(api, guestProgram, sampleMetadata);
+    const result = await program.entrypoint.sumBalance([21, ['15oF4uVJwmo4TdGW7VfQxNLavjCXviqxT9S1MgbjMNHr6Sp5']], { gasLimit: 1000000000000000000n });
     expect(result).toBeDefined();
     await api.disconnect();
   });
