@@ -115,7 +115,17 @@ export class ProgramRegistry {
     };
   }
 
-  findEntrypoint(identifier: string): Entrypoint | undefined {
-    return this.entrypoints.find(entrypoint => entrypoint.identifier === identifier);
+  findEntrypoint(identifier: string | Entrypoint | number): Entrypoint {
+    if (typeof identifier === 'number') {
+      return this.entrypoints[identifier];
+    }
+    if (typeof identifier === 'string') {
+      const entrypoint = this.entrypoints.find(entrypoint => entrypoint.identifier === identifier);
+      if (!entrypoint) {
+        throw new Error(`Entrypoint ${identifier} not found`);
+      }
+      return entrypoint;
+    }
+    return identifier;
   }
 }

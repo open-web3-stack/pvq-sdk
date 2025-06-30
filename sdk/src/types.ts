@@ -16,3 +16,23 @@ export interface ProgramMetadata extends Struct {
   types: PortableRegistry;
   entrypoints: FunctionMetadata[];
 };
+
+export enum PvqError {
+  FailedToDecode,
+  InvalidPvqProgramFormat,
+  QueryExceedsWeightLimit,
+  Trap,
+  MemoryAccessError,
+  HostCallError,
+  Other,
+}
+
+export interface PvqResultOk {
+  ok: Uint8Array;
+  err?: undefined;
+}
+export interface PvqResultErr {
+  ok?: undefined;
+  err: PvqError;
+}
+export type PvqResult = PvqResultOk | PvqResultErr;

@@ -9,11 +9,15 @@ import path from 'path';
 describe('PvqProgram', () => {
   let program: PvqProgram;
   let mockApi: ApiPromise;
+  let guestProgram: `0x${string}`;
+
 
   beforeEach(() => {
     // Create a real API for testing
     mockApi = {} as ApiPromise;
-    program = new PvqProgram(mockApi, sampleMetadata);
+    const guestPath = path.resolve(__dirname, './guests/guest-sum-balance.polkavm');
+    guestProgram = u8aToHex(fs.readFileSync(guestPath));
+    program = new PvqProgram(mockApi, guestProgram, sampleMetadata);
   });
 
   test('should create program instance', () => {
@@ -45,7 +49,7 @@ describe('PvqProgram', () => {
   test('should fetch metadata from chain', async () => {
     const provider = new WsProvider('ws://127.0.0.1:8000');
     const api = await ApiPromise.create({ provider });
-    const program = new PvqProgram(api, sampleMetadata);
+    const program = new PvqProgram(api, guestProgram, sampleMetadata);
     const metadata = await program.metadata();
 
     expect(metadata).toBeDefined();
@@ -56,7 +60,7 @@ describe('PvqProgram', () => {
   test('should fetch and parse metadata from chain', async () => {
     const provider = new WsProvider('ws://127.0.0.1:8000');
     const api = await ApiPromise.create({ provider });
-    const program = new PvqProgram(api, sampleMetadata);
+    const program = new PvqProgram(api, guestProgram, sampleMetadata);
     const metadata = await program.metadata();
     console.log(metadata);
     expect(metadata).toBeDefined();
@@ -71,9 +75,38 @@ describe('PvqProgram', () => {
 
     const provider = new WsProvider('ws://127.0.0.1:8000');
     const api = await ApiPromise.create({ provider });
-    const program = new PvqProgram(api, sampleMetadata);
+    const program = new PvqProgram(api, guestProgram, sampleMetadata);
     const result = await program.api.call.pvqApi.executeQuery(guestProgram, args, gas_limit);
-    console.log('result', result.toJSON());
+    console.log('guestProgram', guestProgram.length);
+    console.log('args', args.length);
+    expect(result).toBeDefined();
+    await api.disconnect();
+  });
+
+  test('should call executeQuery with correct params', async () => {
+    const guestPath = path.resolve(__dirname, './guests/guest-sum-balance.polkavm');
+    const guestProgram = u8aToHex(fs.readFileSync(guestPath));
+    const gas_limit = undefined;
+
+    const provider = new WsProvider('ws://127.0.0.1:8000');
+    const api = await ApiPromise.create({ provider });
+    const program = new PvqProgram(api, guestProgram, sampleMetadata);
+    const result = await program.executeQuery('sum_balance', { gasLimit: gas_limit }, [21, ['15oF4uVJwmo4TdGW7VfQxNLavjCXviqxT9S1MgbjMNHr6Sp5']]);
+    // console.log('result', result.toJSON());
+    expect(result).toBeDefined();
+    await api.disconnect();
+  });
+
+  test('should call executeQuery with correct params', async () => {
+    const guestPath = path.resolve(__dirname, './guests/guest-sum-balance.polkavm');
+    const guestProgram = u8aToHex(fs.readFileSync(guestPath));
+    const gas_limit = undefined;
+
+    const provider = new WsProvider('ws://127.0.0.1:8000');
+    const api = await ApiPromise.create({ provider });
+    const program = new PvqProgram(api, guestProgram, sampleMetadata);
+    const result = await program.executeQuery('sum_balance', { gasLimit: gas_limit }, [21, ['15oF4uVJwmo4TdGW7VfQxNLavjCXviqxT9S1MgbjMNHr6Sp5']]);
+    console.log('result', result);
     expect(result).toBeDefined();
     await api.disconnect();
   });
