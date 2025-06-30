@@ -7,17 +7,6 @@ import { hexToU8a, type BN, compactAddLength, compactFromU8a, u8aToHex } from '@
 import type { Bytes } from '@polkadot/types-codec';
 
 
-
-function decodePvqResult(data: Uint8Array): PvqResult {
-  const flag = data[0];
-  if (flag === 0x00) {
-    return { ok: data.slice(1) };
-  } else if (flag === 0x01) {
-    const errorIndex = data[1];
-    return { err: errorIndex };
-  }
-  throw new Error('Invalid PvqResult encoding');
-}
 function toCamelCase(str: string): string {
   return str.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
 }
