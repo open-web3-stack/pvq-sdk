@@ -1,4 +1,5 @@
 export const typesDef = {
+  '[u8;32]': 'AccountId',
   FunctionParamMetadata: {
     name: 'Text',
     ty: 'Compact<u32>',
@@ -12,8 +13,12 @@ export const typesDef = {
     name: 'Text',
     functions: 'Vec<FunctionMetadata>',
   },
-  PvqMetadata: {
+  RuntimeMetadata: {
     types: 'PortableRegistry',
     extensions: 'Vec<ExtensionMetadata>',
+  },
+  ProgramMetadata: {
+    types: 'PortableRegistry',
+    entrypoints: 'Vec<FunctionMetadata>',
   },
 }

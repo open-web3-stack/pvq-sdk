@@ -1,0 +1,87 @@
+{
+  "types": {
+      "types": [
+          {
+              "id": 0,
+              "type": {
+                  "def": {
+                      "primitive": "u32"
+                  }
+              }
+          },
+          {
+              "id": 1,
+              "type": {
+                  "def": {
+                      "array": {
+                          "len": 32,
+                          "type": 2
+                      }
+                  }
+              }
+          },
+          {
+              "id": 2,
+              "type": {
+                  "def": {
+                      "primitive": "u8"
+                  }
+              }
+          },
+          {
+              "id": 3,
+              "type": {
+                  "def": {
+                      "primitive": "u64"
+                  }
+              }
+          },
+          {
+              "id": 4,
+              "type": {
+                  "def": {
+                      "sequence": {
+                          "type": 1
+                      }
+                  }
+              }
+          }
+      ]
+  },
+  "extension_fns": [
+      [
+          4071833530116166512,
+          1,
+          {
+              "name": "balance",
+              "inputs": [
+                  {
+                      "name": "asset",
+                      "ty": 0
+                  },
+                  {
+                      "name": "who",
+                      "ty": 1
+                  }
+              ],
+              "output": 3
+          }
+      ]
+  ],
+  "entrypoints": [
+      {
+          "name": "sum_balance",
+          "inputs": [
+              {
+                  "name": "asset",
+                  "ty": 0
+              },
+              {
+                  "name": "accounts",
+                  "ty": 4
+              }
+          ],
+          "output": 3
+      }
+  ]
+}

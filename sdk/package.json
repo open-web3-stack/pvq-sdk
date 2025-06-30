@@ -4,7 +4,8 @@
   "devDependencies": {
     "@types/bun": "latest",
     "esbuild": "^0.25.2",
-    "prettier": "^3.5.3"
+    "prettier": "^3.5.3",
+    "eslint": "^9.0.0"
   },
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
@@ -17,7 +18,9 @@
     "test": "bun test",
     "build": "bun run build:js && bun run build:types",
     "build:js": "bun run build.cjs",
-    "build:types": "tsc -p tsconfig.types.json"
+    "build:types": "tsc -p tsconfig.types.json",
+    "lint": "eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
@@ -26,6 +29,7 @@
     "@polkadot/api": "^15.9.2",
     "@polkadot/types": "^15.9.2",
     "@polkadot/types-codec": "^15.9.2",
-    "@polkadot/util": "^13.4.4"
+    "@polkadot/util": "^13.4.4",
+    "@polkadot/util-crypto": "^13.5.2"
   }
 }

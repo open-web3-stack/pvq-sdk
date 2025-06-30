@@ -7,17 +7,12 @@ interface FunctionParamMetadata extends Struct {
 };
 
 interface FunctionMetadata extends Struct {
-  name: Text,
-  inputs: FunctionParamMetadata[],
-  output: U32,
-};
-
-interface ExtensionMetadata extends Struct {
   name: Text;
-  functions: FunctionMetadata[];
+  inputs: FunctionParamMetadata[];
+  output: U32;
 };
 
-export interface PvqMetadata extends Struct {
+export interface ProgramMetadata extends Struct {
   types: PortableRegistry;
-  extensions: ExtensionMetadata[];
+  entrypoints: FunctionMetadata[];
 };
