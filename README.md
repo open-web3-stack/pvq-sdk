@@ -64,6 +64,17 @@ const metadata = await program.metadata();
 console.log('Chain metadata:', metadata);
 ```
 
+### Checking Extensions
+
+```typescript
+// Check whether the program's extensions match the extensions on the current chain
+const matched = await program.checkExtensions();
+console.log('Extensions matched:', matched); // true or throws error if not matched
+
+// You can also check the cached result
+console.log('Cached result:', program.extensionsMatched); // true/false/undefined
+```
+
 ## Program Metadata Format
 
 Your program metadata should follow this structure:
@@ -75,23 +86,57 @@ Your program metadata should follow this structure:
       {
         "id": 0,
         "type": {
-          "def": {
-            "primitive": "u32"
-          }
+          "def": { "primitive": "u32" }
+        }
+      },
+      {
+        "id": 1,
+        "type": {
+          "def": { "array": { "len": 32, "type": 2 } }
+        }
+      },
+      {
+        "id": 2,
+        "type": {
+          "def": { "primitive": "u8" }
+        }
+      },
+      {
+        "id": 3,
+        "type": {
+          "def": { "primitive": "u64" }
+        }
+      },
+      {
+        "id": 4,
+        "type": {
+          "def": { "sequence": { "type": 1 } }
         }
       }
     ]
   },
+  "extension_fns": [
+    [
+      "4071833530116166512",
+      1,
+      {
+        "name": "balance",
+        "inputs": [
+          { "name": "asset", "ty": 0 },
+          { "name": "who", "ty": 1 }
+        ],
+        "output": 3
+      }
+    ]
+  ],
   "entrypoints": [
     {
       "name": "sum_balance",
       "inputs": [
-        {
-          "name": "asset",
-          "ty": 0
-        }
+        { "name": "asset", "ty": 0 },
+        { "name": "accounts", "ty": 4 }
       ],
-      "output": 1
+      "output": 3
     }
   ]
 }

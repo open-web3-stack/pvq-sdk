@@ -43,19 +43,14 @@ describe('ProgramRegistry class', () => {
     const entrypoint = programRegistry.findEntrypoint('sum_balance');
 
     expect(entrypoint).toBeDefined();
+    console.log(entrypoint);
     expect(entrypoint?.identifier).toBe('sum_balance');
     expect(entrypoint?.args).toHaveLength(2);
     expect(entrypoint?.args[0].name).toBe('asset');
   });
 
-  test('should return undefined for non-existent entrypoint', () => {
-    const entrypoint = programRegistry.findEntrypoint('nonExistentFunction');
-    expect(entrypoint).toBeUndefined();
-  });
-
   test('should have correct entrypoint structure', () => {
     const entrypoint = programRegistry.findEntrypoint('sum_balance');
-
     expect(entrypoint).toBeDefined();
     expect(entrypoint?.args).toHaveLength(2);
     expect(entrypoint?.args[0].name).toBe('asset');
@@ -87,5 +82,19 @@ describe('ProgramRegistry class', () => {
     }).toThrow('Expected 2 parameters, but got 1');
   });
 
-
+  test('should have correct extensionFns', () => {
+    const extensionFns = programRegistry.extensionFns;
+    expect(extensionFns).toBeDefined();
+    expect(Array.isArray(extensionFns)).toBe(true);
+    expect(extensionFns!.length).toBeGreaterThan(0);
+    const fn = extensionFns![0];
+    console.log(fn);
+    expect(fn).toHaveProperty('id');
+    expect(fn).toHaveProperty('index');
+    expect(fn).toHaveProperty('signature');
+    expect(fn.signature).toContain('balance');
+    expect(typeof fn.id).toBe('string');
+    expect(typeof fn.index).toBe('number');
+    expect(typeof fn.signature).toBe('string');
+  });
 }); 

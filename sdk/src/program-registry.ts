@@ -1,8 +1,8 @@
-import { TypeRegistry } from '@polkadot/types';
+import { TypeRegistry, U64 } from '@polkadot/types';
 import type { ChainProperties } from '@polkadot/types/interfaces';
 import type { TypeDef } from '@polkadot/types/types';
 import { compactStripLength, hexToU8a, isHex, u8aConcat } from '@polkadot/util';
-import type { ProgramMetadata } from './types';
+import type { FunctionMetadata, ProgramMetadata } from './types';
 import { typesDef } from './typesdef';
 
 export interface Param {
@@ -12,6 +12,7 @@ export interface Param {
 
 export interface Entrypoint {
   args: Param[];
+  signature: string;
   identifier: string;
   index: number;
   method: string;
@@ -35,7 +36,7 @@ export function parseMetadata(hexOrJSON: `0x${string}` | Record<string, unknown>
     throw new Error(`Unable to parse metadata: ${error}, input: ${hexOrJSON}`);
   }
 
-  const lookup = registry.createType('PortableRegistry', (metadata as any).types.toJSON(), true);
+  const lookup = registry.createType('PortableRegistry', metadata.types.toJSON(), true);
 
   // attach the lookup to the registry - now the types are known
   registry.setLookup(lookup);
@@ -52,34 +53,62 @@ export function parseMetadata(hexOrJSON: `0x${string}` | Record<string, unknown>
   return [metadata, registry] as const;
 }
 
+export function parseFunctionMetadata(func: FunctionMetadata, registry: TypeRegistry) {
+  const method = func.name.toString();
+  const args: Param[] = func.inputs.map((input: any) => ({
+    name: input.name.toString(),
+    type: registry.lookup.getTypeDef(input.ty.toNumber())
+  }));
+
+  const returnType = func.output.toNumber() !== 0
+    ? registry.lookup.getTypeDef(func.output.toNumber())
+    : null;
+
+  const signature = `${method}(${args.map((arg) => arg.type.type).join(',')}):(${returnType?.type})`;
+
+  return { args, signature, returnType, method }
+}
+
 export class ProgramRegistry {
   metadata: ProgramMetadata;
   registry: TypeRegistry;
   entrypoints: Entrypoint[];
+  _extensionFns: {
+    id: string;
+    index: number;
+    signature: string;
+  }[];
 
-  constructor(ProgramMetadata: Record<string, unknown> | ProgramMetadata) {
-    [this.metadata, this.registry] = parseMetadata(ProgramMetadata);
+  constructor(programMetadata: Record<string, unknown>) {
+    [this.metadata, this.registry] = parseMetadata(programMetadata);
     this.entrypoints = this.metadata.entrypoints.map((entrypoint, index) =>
       this.createEntrypoint(entrypoint, index)
     );
+    if (!(programMetadata).extension_fns || !Array.isArray(programMetadata.extension_fns)) {
+      throw new Error('Extension functions not found in metadata');
+    }
+    this._extensionFns = programMetadata.extension_fns.map((items: [number, number, Record<string, unknown>]) => {
+      const func: FunctionMetadata = this.registry.createType('FunctionMetadata', items[2]);
+      const { signature } = parseFunctionMetadata(func, this.registry);
+
+      return {
+        id: items[0].toString(),
+        index: items[1],
+        signature: signature
+      }
+    });
   }
 
   private createEntrypoint(func: any, entrypointIndex: number): Entrypoint {
-    const args: Param[] = func.inputs.map((input: any) => ({
-      name: input.name.toString(),
-      type: this.registry.lookup.getTypeDef(input.ty.toNumber())
-    }));
-
-    const returnType = func.output.toNumber() !== 0
-      ? this.registry.lookup.getTypeDef(func.output.toNumber())
-      : null;
+    const { args, signature, returnType, method } = parseFunctionMetadata(func, this.registry);
 
     return {
       args,
-      identifier: func.name.toString(),
-      index: entrypointIndex,
-      method: func.name.toString(),
+      signature,
+      method,
       returnType,
+      identifier: method,
+      index: entrypointIndex,
       toU8a: (params: unknown[]) => {
         if (params.length !== args.length) {
           throw new Error(`Expected ${args.length} parameters, but got ${params.length}`);
@@ -127,5 +156,9 @@ export class ProgramRegistry {
       return entrypoint;
     }
     return identifier;
+  }
+
+  get extensionFns() {
+    return this._extensionFns
   }
 }

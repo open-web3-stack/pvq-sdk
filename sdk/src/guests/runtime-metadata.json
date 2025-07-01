@@ -1,0 +1,110 @@
+{
+  "types": {
+    "types": [
+      {
+        "id": 0,
+        "type": {
+          "path": [],
+          "params": [],
+          "def": {
+            "primitive": "U32"
+          },
+          "docs": []
+        }
+      },
+      {
+        "id": 1,
+        "type": {
+          "path": [],
+          "params": [],
+          "def": {
+            "primitive": "U64"
+          },
+          "docs": []
+        }
+      },
+      {
+        "id": 2,
+        "type": {
+          "path": [],
+          "params": [],
+          "def": {
+            "array": {
+              "len": 32,
+              "type": 3
+            }
+          },
+          "docs": []
+        }
+      },
+      {
+        "id": 3,
+        "type": {
+          "path": [],
+          "params": [],
+          "def": {
+            "primitive": "U8"
+          },
+          "docs": []
+        }
+      },
+      {
+        "id": 4,
+        "type": {
+          "path": [],
+          "params": [],
+          "def": {
+            "primitive": "Bool"
+          },
+          "docs": []
+        }
+      }
+    ]
+  },
+  "extensions": {
+    "4071833530116166512": {
+      "name": "ExtensionFungibles",
+      "functions": [
+        {
+          "name": "total_supply",
+          "inputs": [
+            {
+              "name": "asset",
+              "ty": 0
+            }
+          ],
+          "output": 1
+        },
+        {
+          "name": "balance",
+          "inputs": [
+            {
+              "name": "asset",
+              "ty": 0
+            },
+            {
+              "name": "who",
+              "ty": 2
+            }
+          ],
+          "output": 1
+        }
+      ]
+    },
+    "8702846780458093357": {
+      "name": "ExtensionCore",
+      "functions": [
+        {
+          "name": "has_extension",
+          "inputs": [
+            {
+              "name": "id",
+              "ty": 1
+            }
+          ],
+          "output": 4
+        }
+      ]
+    }
+  }
+}

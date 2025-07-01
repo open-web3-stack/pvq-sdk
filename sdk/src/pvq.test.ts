@@ -34,7 +34,7 @@ describe('PvqProgram', () => {
     const provider = new WsProvider('ws://127.0.0.1:8000');
     const api = await ApiPromise.create({ provider });
     const program = new PvqProgram(api, guestProgram, sampleMetadata);
-    const metadata = await program.metadata();
+    const metadata = await program.getMetadata();
 
     expect(metadata).toBeDefined();
 
@@ -45,12 +45,12 @@ describe('PvqProgram', () => {
     const provider = new WsProvider('ws://127.0.0.1:8000');
     const api = await ApiPromise.create({ provider });
     const program = new PvqProgram(api, guestProgram, sampleMetadata);
-    const metadata = await program.metadata();
+    const metadata = await program.getMetadata();
     expect(metadata).toBeDefined();
     await api.disconnect();
   });
 
-  test('should call executeQuery with correct params', async () => {
+  test('should call pvqApi.executeQuery directly with raw args', async () => {
     const guestPath = path.resolve(__dirname, './guests/guest-sum-balance.polkavm');
     const guestProgram = u8aToHex(fs.readFileSync(guestPath));
     const args = '0x001500000004d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d';
@@ -60,13 +60,11 @@ describe('PvqProgram', () => {
     const api = await ApiPromise.create({ provider });
     const program = new PvqProgram(api, guestProgram, sampleMetadata);
     const result = await program.api.call.pvqApi.executeQuery(guestProgram, args, gas_limit);
-    console.log('guestProgram', guestProgram.length);
-    console.log('args', args.length);
     expect(result).toBeDefined();
     await api.disconnect();
   });
 
-  test('should call executeQuery with correct params', async () => {
+  test('should execute sum_balance query via executeQuery method', async () => {
     const guestPath = path.resolve(__dirname, './guests/guest-sum-balance.polkavm');
     const guestProgram = u8aToHex(fs.readFileSync(guestPath));
     const gas_limit = undefined;
@@ -75,26 +73,11 @@ describe('PvqProgram', () => {
     const api = await ApiPromise.create({ provider });
     const program = new PvqProgram(api, guestProgram, sampleMetadata);
     const result = await program.executeQuery('sum_balance', { gasLimit: gas_limit }, [21, ['15oF4uVJwmo4TdGW7VfQxNLavjCXviqxT9S1MgbjMNHr6Sp5']]);
-    // console.log('result', result.toJSON());
     expect(result).toBeDefined();
     await api.disconnect();
   });
 
-  test('should call executeQuery with correct params', async () => {
-    const guestPath = path.resolve(__dirname, './guests/guest-sum-balance.polkavm');
-    const guestProgram = u8aToHex(fs.readFileSync(guestPath));
-    const gas_limit = undefined;
-
-    const provider = new WsProvider('ws://127.0.0.1:8000');
-    const api = await ApiPromise.create({ provider });
-    const program = new PvqProgram(api, guestProgram, sampleMetadata);
-    const result = await program.executeQuery('sum_balance', { gasLimit: gas_limit }, [21, ['15oF4uVJwmo4TdGW7VfQxNLavjCXviqxT9S1MgbjMNHr6Sp5']]);
-    console.log('result', result);
-    expect(result).toBeDefined();
-    await api.disconnect();
-  });
-
-  test('sum_balance', async () => {
+  test('should execute sum_balance query via entrypoint method', async () => {
     const guestPath = path.resolve(__dirname, './guests/guest-sum-balance.polkavm');
     const guestProgram = u8aToHex(fs.readFileSync(guestPath));
     const gas_limit = undefined;
@@ -107,7 +90,7 @@ describe('PvqProgram', () => {
     await api.disconnect();
   });
 
-  test('gas_limit', async () => {
+  test('should execute query with custom gas limit', async () => {
     const guestPath = path.resolve(__dirname, './guests/guest-sum-balance.polkavm');
     const guestProgram = u8aToHex(fs.readFileSync(guestPath));
     const gas_limit = undefined;
@@ -119,4 +102,79 @@ describe('PvqProgram', () => {
     expect(result).toBeDefined();
     await api.disconnect();
   });
+
+  test('should check extensions successfully', async () => {
+    const provider = new WsProvider('ws://127.0.0.1:8000');
+    const api = await ApiPromise.create({ provider });
+    const program = new PvqProgram(api, guestProgram, sampleMetadata);
+    
+    const result = await program.checkExtensions();
+    expect(typeof result).toBe('boolean');
+    expect(program.extensionsMatched).toBeDefined();
+    
+    await api.disconnect();
+  });
+
+  test('should cache extensions check result', async () => {
+    const provider = new WsProvider('ws://127.0.0.1:8000');
+    const api = await ApiPromise.create({ provider });
+    const program = new PvqProgram(api, guestProgram, sampleMetadata);
+    
+    const result1 = await program.checkExtensions();
+
+    const result2 = await program.checkExtensions();
+    
+    expect(result1).toBe(result2);
+    expect(program.extensionsMatched).toBe(result1);
+    
+    await api.disconnect();
+  });
+
+  /*
+  test('should handle extensions check failure gracefully', async () => {
+    const mockApi = {
+      rx: {
+        call: {
+          pvqApi: {
+            metadata: () => Promise.reject(new Error('Network error'))
+          }
+        }
+      },
+      call: {
+        pvqApi: {
+          metadata: () => Promise.reject(new Error('Network error'))
+        }
+      }
+    } as any;
+    
+    const program = new PvqProgram(mockApi, guestProgram, sampleMetadata);
+    
+    const result = await program.checkExtensions();
+    expect(result).toBe(false);
+    expect(program.extensionsMatched).toBe(false);
+  });
+
+  test('should throw error when extensions check fails in executeQuery', async () => {
+    // 创建一个mock API，模拟getMetadata失败
+    const mockApi = {
+      rx: {
+        call: {
+          pvqApi: {
+            metadata: () => Promise.reject(new Error('Network error'))
+          }
+        }
+      },
+      call: {
+        pvqApi: {
+          metadata: () => Promise.reject(new Error('Network error'))
+        }
+      }
+    } as any;
+    
+    const program = new PvqProgram(mockApi, guestProgram, sampleMetadata);
+    
+    await expect(program.executeQuery('sum_balance', {}, [21, ['15oF4uVJwmo4TdGW7VfQxNLavjCXviqxT9S1MgbjMNHr6Sp5']]))
+      .rejects.toThrow('Extensions check failed');
+  });
+  */
 }); 
