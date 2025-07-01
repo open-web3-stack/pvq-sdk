@@ -9,13 +9,14 @@ export const typesDef = {
     inputs: 'Vec<FunctionParamMetadata>',
     output: 'Compact<u32>',
   },
+  ExtensionIdTy: 'u64',
   ExtensionMetadata: {
     name: 'Text',
     functions: 'Vec<FunctionMetadata>',
   },
   RuntimeMetadata: {
     types: 'PortableRegistry',
-    extensions: 'Vec<ExtensionMetadata>',
+    extensions: 'BTreeMap<ExtensionIdTy, ExtensionMetadata>',
   },
   ProgramMetadata: {
     types: 'PortableRegistry',

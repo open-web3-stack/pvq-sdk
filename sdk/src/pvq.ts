@@ -3,7 +3,7 @@ import type { ApiTypes } from '@polkadot/api/types';
 import { firstValueFrom } from 'rxjs';
 import { ProgramRegistry, type Entrypoint } from './program-registry';
 import type { ProgramMetadata, PvqResult } from './types';
-import { hexToU8a, type BN, compactAddLength, compactFromU8a, u8aToHex } from '@polkadot/util';
+import { hexToU8a, type BN, compactAddLength, compactFromU8a, u8aToHex, compactStripLength } from '@polkadot/util';
 import type { Bytes } from '@polkadot/types-codec';
 
 
@@ -77,7 +77,8 @@ export class PvqProgram {
 
   async metadata() {
     const codec: Uint8Array = await firstValueFrom(this.api.rx.call.pvqApi.metadata());
-    return codec
+    const [, data] = compactStripLength(codec)
+    return this.registry.registry.createType('RuntimeMetadata', data);
   }
 }
 
