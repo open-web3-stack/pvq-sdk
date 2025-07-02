@@ -1,14 +1,7 @@
 {
   "name": "@open-web3/pvq",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
-  "devDependencies": {
-    "@types/bun": "latest",
-    "@types/node": "^20.0.0",
-    "esbuild": "^0.25.2",
-    "eslint": "^9.0.0",
-    "prettier": "^3.5.3"
-  },
   "main": "dist/cjs/pvq.js",
   "module": "dist/esm/pvq.js",
   "types": "dist/types/pvq.d.ts",
@@ -31,14 +24,25 @@
     "clean": "rm -rf dist"
   },
   "peerDependencies": {
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "@polkadot/api": "^16",
+    "@polkadot/types": "^16",
+    "@polkadot/types-codec": "^16",
+    "@polkadot/util": "^13",
+    "@polkadot/util-crypto": "^13",
+    "rxjs": "*"
   },
-  "dependencies": {
-    "@polkadot/api": "^15.9.2",
-    "@polkadot/types": "^15.9.2",
-    "@polkadot/types-codec": "^15.9.2",
-    "@polkadot/util": "^13.5.2",
-    "@polkadot/util-crypto": "^13.5.2",
-    "rxjs": "^7.8.2"
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/node": "^20.0.0",
+    "esbuild": "^0.25.2",
+    "eslint": "^9.0.0",
+    "prettier": "^3.5.3",
+    "@polkadot/api": "^16",
+    "@polkadot/types": "^16",
+    "@polkadot/types-codec": "^16",
+    "@polkadot/util": "^13",
+    "@polkadot/util-crypto": "^13",
+    "rxjs": "^7"
   }
 }

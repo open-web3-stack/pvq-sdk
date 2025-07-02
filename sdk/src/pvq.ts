@@ -2,7 +2,7 @@ import type { ApiPromise } from '@polkadot/api';
 import type { ApiRx } from '@polkadot/api/cjs/bundle';
 import { TypeRegistry } from '@polkadot/types';
 import type { Bytes } from '@polkadot/types-codec';
-import { compactStripLength, u8aToHex, type BN } from '@polkadot/util';
+import { compactStripLength, u8aToHex, u8aToU8a, type BN } from '@polkadot/util';
 import { firstValueFrom } from 'rxjs';
 import { parseFunctionMetadata, ProgramRegistry, type Entrypoint } from './program-registry';
 import type { RuntimeMetadata } from './types';
@@ -28,7 +28,7 @@ export class PvqProgram {
     this.api = api;
     this.registry = new ProgramRegistry(programMetadata);
     this._entrypoints = this.createEntrypointMap();
-    this.guestProgram = this.registry.registry.createType('Bytes', guestProgram);
+    this.guestProgram = this.registry.registry.createType('Bytes', u8aToHex(u8aToU8a(guestProgram)));
   }
 
   public async checkExtensions(): Promise<boolean> {
