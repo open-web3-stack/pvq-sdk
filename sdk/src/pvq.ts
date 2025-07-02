@@ -1,11 +1,11 @@
 import type { ApiBase } from '@polkadot/api/base';
 import type { ApiTypes } from '@polkadot/api/types';
+import { TypeRegistry } from '@polkadot/types';
 import type { Bytes } from '@polkadot/types-codec';
 import { compactStripLength, u8aToHex, type BN } from '@polkadot/util';
 import { firstValueFrom } from 'rxjs';
 import { parseFunctionMetadata, ProgramRegistry, type Entrypoint } from './program-registry';
-import type { ProgramMetadata, RuntimeMetadata } from './types';
-import { TypeRegistry } from '@polkadot/types';
+import type { RuntimeMetadata } from './types';
 import { typesDef } from './typesdef';
 
 

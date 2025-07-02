@@ -29,17 +29,19 @@ jobs:
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
         
+      - name: Install SDK dependencies
+        run: |
+          cd sdk
+          pnpm install
+        
       - name: Build SDK
         run: |
-          cd sdk
-          pnpm build
-          ls -la dist/
+          pnpm --filter sdk build
+          ls -la sdk/dist/
           
       - name: Run tests
-        run: |
-          cd sdk
-          pnpm test
-          
+        run: pnpm --filter sdk test
+        
       - name: Check NPM_TOKEN
         run: |
           if [ -z "${{ secrets.NPM_TOKEN }}" ]; then

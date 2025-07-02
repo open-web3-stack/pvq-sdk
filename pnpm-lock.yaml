@@ -121,6 +121,9 @@ importers:
       '@types/bun':
         specifier: latest
         version: 1.2.17
+      '@types/node':
+        specifier: ^20.0.0
+        version: 20.19.0
       esbuild:
         specifier: ^0.25.2
         version: 0.25.5
