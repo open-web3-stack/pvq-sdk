@@ -97,7 +97,7 @@ importers:
   sdk:
     dependencies:
       typescript:
-        specifier: ^5.0.0
+        specifier: '*'
         version: 5.8.3
     devDependencies:
       '@polkadot/api':

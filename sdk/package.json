@@ -1,6 +1,6 @@
 {
   "name": "@open-web3/pvq",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "type": "module",
   "main": "dist/cjs/pvq.js",
   "module": "dist/esm/pvq.js",
@@ -24,12 +24,12 @@
     "clean": "rm -rf dist"
   },
   "peerDependencies": {
-    "typescript": "^5.0.0",
-    "@polkadot/api": "^16",
-    "@polkadot/types": "^16",
-    "@polkadot/types-codec": "^16",
-    "@polkadot/util": "^13",
-    "@polkadot/util-crypto": "^13",
+    "typescript": "*",
+    "@polkadot/api": "*",
+    "@polkadot/types": "*",
+    "@polkadot/types-codec": "*",
+    "@polkadot/util": "*",
+    "@polkadot/util-crypto": "*",
     "rxjs": "*"
   },
   "devDependencies": {
