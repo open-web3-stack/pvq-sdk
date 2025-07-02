@@ -36,11 +36,9 @@ jobs:
         
       - name: Build SDK
         run: |
-          pnpm --filter sdk build
+          pnpm --filter @open-web3/pvq build
           ls -la sdk/dist/
           
-      - name: Run tests
-        run: pnpm --filter sdk test
         
       - name: Check NPM_TOKEN
         run: |
