@@ -111,6 +111,9 @@ importers:
       '@polkadot/util-crypto':
         specifier: ^13.5.2
         version: 13.5.2(@polkadot/util@13.5.2)
+      rxjs:
+        specifier: ^7.8.2
+        version: 7.8.2
       typescript:
         specifier: ^5.0.0
         version: 5.8.3

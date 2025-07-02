@@ -5,8 +5,8 @@
   "devDependencies": {
     "@types/bun": "latest",
     "esbuild": "^0.25.2",
-    "prettier": "^3.5.3",
-    "eslint": "^9.0.0"
+    "eslint": "^9.0.0",
+    "prettier": "^3.5.3"
   },
   "main": "dist/cjs/pvq.js",
   "module": "dist/esm/pvq.js",
@@ -37,6 +37,7 @@
     "@polkadot/types": "^15.9.2",
     "@polkadot/types-codec": "^15.9.2",
     "@polkadot/util": "^13.5.2",
-    "@polkadot/util-crypto": "^13.5.2"
+    "@polkadot/util-crypto": "^13.5.2",
+    "rxjs": "^7.8.2"
   }
 }
