@@ -1,8 +1,7 @@
 name: Publish to npm
 
 on:
-  release:
-    types: [published]
+  workflow_dispatch:
 
 jobs:
   publish:
@@ -24,23 +23,9 @@ jobs:
           bun-version: latest
           
       - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: latest
-          
-      - name: Get pnpm store directory
-        shell: bash
         run: |
-          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+          npm install -g pnpm@latest
           
-      - name: Setup pnpm cache
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-            
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
         
