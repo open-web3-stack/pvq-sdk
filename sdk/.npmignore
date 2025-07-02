@@ -1,0 +1,32 @@
+# Source files
+src/
+*.ts
+*.tsx
+
+# Build artifacts
+*.map
+dist/**/*.map
+
+# Test files
+*.test.js
+*.test.d.ts
+**/*.test.*
+
+# Development files
+.git/
+.gitignore
+.eslintrc*
+.prettierrc*
+tsconfig*.json
+build.cjs
+bun.lockb
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db 

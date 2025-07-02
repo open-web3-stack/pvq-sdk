@@ -1,5 +1,6 @@
 {
-  "name": "pvq-sdk",
+  "name": "@open-web3/pvq",
+  "version": "0.0.1",
   "type": "module",
   "devDependencies": {
     "@types/bun": "latest",
@@ -7,20 +8,26 @@
     "prettier": "^3.5.3",
     "eslint": "^9.0.0"
   },
-  "main": "dist/cjs/index.js",
-  "module": "dist/esm/index.js",
-  "types": "dist/types/index.d.ts",
+  "main": "dist/cjs/pvq.js",
+  "module": "dist/esm/pvq.js",
+  "types": "dist/types/pvq.d.ts",
   "exports": {
-    "require": "./dist/cjs/index.js",
-    "import": "./dist/esm/index.js"
+    "require": "./dist/cjs/pvq.js",
+    "import": "./dist/esm/pvq.js"
   },
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "scripts": {
     "test": "bun test",
     "build": "bun run build:js && bun run build:types",
     "build:js": "bun run build.cjs",
     "build:types": "tsc -p tsconfig.types.json",
     "lint": "eslint src/**/*.ts",
-    "lint:fix": "eslint src/**/*.ts --fix"
+    "lint:fix": "eslint src/**/*.ts --fix",
+    "prepublishOnly": "pnpm build",
+    "clean": "rm -rf dist"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"

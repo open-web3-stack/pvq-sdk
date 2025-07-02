@@ -1,7 +1,12 @@
 import { build } from "esbuild";
 
 await build({
-  entryPoints: ["src/index.ts"],
+  entryPoints: [
+    "src/pvq.ts",
+    "src/program-registry.ts",
+    "src/types.ts",
+    "src/typesdef.ts"
+  ],
   outdir: "dist/esm",
   bundle: false,
   format: "esm",
@@ -11,7 +16,12 @@ await build({
 });
 
 await build({
-  entryPoints: ["src/index.ts"],
+  entryPoints: [
+    "src/pvq.ts",
+    "src/program-registry.ts",
+    "src/types.ts",
+    "src/typesdef.ts"
+  ],
   outdir: "dist/cjs",
   bundle: false,
   format: "cjs",
