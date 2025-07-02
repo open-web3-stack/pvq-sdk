@@ -1,5 +1,5 @@
-import type { ApiBase } from '@polkadot/api/base';
-import type { ApiTypes } from '@polkadot/api/types';
+import type { ApiPromise } from '@polkadot/api';
+import type { ApiRx } from '@polkadot/api/cjs/bundle';
 import { TypeRegistry } from '@polkadot/types';
 import type { Bytes } from '@polkadot/types-codec';
 import { compactStripLength, u8aToHex, type BN } from '@polkadot/util';
@@ -19,12 +19,12 @@ export interface ExecuteQueryOptions {
 
 export class PvqProgram {
   public registry: ProgramRegistry;
-  public api: ApiBase<ApiTypes>;
+  public api: ApiPromise | ApiRx;
   public guestProgram: Bytes;
   private _entrypoints: Record<string, (params: unknown[], options?: ExecuteQueryOptions) => Promise<unknown>>;
   private _extensionsMatched: boolean | undefined = undefined;
 
-  constructor(api: ApiBase<ApiTypes>, guestProgram: Uint8Array | `0x${string}`, programMetadata: Record<string, unknown>) {
+  constructor(api: ApiPromise | ApiRx, guestProgram: Uint8Array | `0x${string}`, programMetadata: Record<string, unknown>) {
     this.api = api;
     this.registry = new ProgramRegistry(programMetadata);
     this._entrypoints = this.createEntrypointMap();
@@ -88,7 +88,6 @@ export class PvqProgram {
 
   public async executeQuery(entrypoint: string | Entrypoint, { gasLimit = undefined }: ExecuteQueryOptions = {}, params: unknown[]) {
     const matched = await this.checkExtensions();
-    console.log('matched', matched);
     if (!matched) {
       throw new Error('Extensions check failed. Please ensure the required extensions are available.');
     }
