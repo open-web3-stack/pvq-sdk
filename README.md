@@ -2,19 +2,6 @@
 
 A TypeScript SDK for interacting with PolkaVM Query (PVQ)
 
-## Installation
-
-```bash
-# Install the published package
-npm install @open-web3/pvq
-# or
-yarn add @open-web3/pvq
-# or
-pnpm add @open-web3/pvq
-
-# Or install from source
-pnpm add pvq-sdk
-```
 
 ## Quick Start
 
