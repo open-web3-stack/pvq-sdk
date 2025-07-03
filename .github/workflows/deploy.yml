@@ -27,18 +27,18 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: '18'
-        cache: 'npm'
-        cache-dependency-path: demo/package-lock.json
         
-    - name: Install dependencies
-      run: |
-        cd demo
-        npm ci
+     - name: Install pnpm
+        run: |
+          npm install -g pnpm@latest
+          
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
         
     - name: Build
       run: |
         cd demo
-        npm run build
+        pnpm run build
         
     - name: Setup Pages
       uses: actions/configure-pages@v4
