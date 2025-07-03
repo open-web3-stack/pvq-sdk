@@ -1,6 +1,6 @@
 {
   "name": "@open-web3/pvq",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "type": "module",
   "main": "dist/cjs/pvq.js",
   "module": "dist/esm/pvq.js",
