@@ -39,7 +39,7 @@ jobs:
     - name: Build
       run: |
         cd demo
-        pnpm run build
+        GITHUB_PAGES=true pnpm run build
         
     - name: Setup Pages
       uses: actions/configure-pages@v4
