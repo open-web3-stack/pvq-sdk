@@ -18,12 +18,12 @@ export default function Home() {
       <header className="border-b">
         <h1 className="text-3xl font-bold pt-6 pb-2 text-center">PVQ Demo</h1>
         <div className="mt-auto max-w-5xl mx-auto flex gap-4 font-semibold">
-          <Link href="/" className="p-4 text-muted-foreground">
+          <Link href="/" className="p-4">
             Home
           </Link>
-          <Link href="/swap" className="p-4">
+          {/* <Link href="/swap" className="p-4">
             Swap
-          </Link>
+          </Link> */}
         </div>
       </header>
       <Card className="mt-4 max-w-5xl mx-auto">
@@ -38,10 +38,20 @@ export default function Home() {
                   <TabsTrigger value="query">Query</TabsTrigger>
                 </TabsList>
                 <div className="h-px bg-border" />
-                <TabsContent value="program" className="p-1">
+                <TabsContent
+                  forceMount
+                  hidden={tab !== "program"}
+                  value="program"
+                  className="p-1"
+                >
                   <ProgramInfo />
                 </TabsContent>
-                <TabsContent value="query" className="p-1">
+                <TabsContent
+                  forceMount
+                  hidden={tab !== "query"}
+                  value="query"
+                  className="p-1"
+                >
                   <Query />
                 </TabsContent>
               </Tabs>
