@@ -130,3 +130,4 @@ export class PvqProgram {
   }
 }
 
+export { ProgramRegistry, parseFunctionMetadata };

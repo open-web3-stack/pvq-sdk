@@ -1,9 +1,11 @@
 "use client";
 
 import { Connect } from "@/components/Connect";
+import { ProgramInfo } from "@/components/ProgramInfo";
+import { Query } from "@/components/Query";
 import { SelectProgram } from "@/components/SelectProgram";
 import { Card, CardContent } from "@/components/ui/card";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Link from "next/link";
 import { useState } from "react";
@@ -33,8 +35,15 @@ export default function Home() {
               <Tabs value={tab} onValueChange={setTab} className="mt-8">
                 <TabsList>
                   <TabsTrigger value="program">Program</TabsTrigger>
-                  <TabsTrigger value="password">Query</TabsTrigger>
+                  <TabsTrigger value="query">Query</TabsTrigger>
                 </TabsList>
+                <div className="h-px bg-border" />
+                <TabsContent value="program" className="p-1">
+                  <ProgramInfo />
+                </TabsContent>
+                <TabsContent value="query" className="p-1">
+                  <Query />
+                </TabsContent>
               </Tabs>
             </div>
           </div>

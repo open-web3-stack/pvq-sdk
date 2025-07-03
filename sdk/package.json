@@ -1,13 +1,14 @@
 {
   "name": "@open-web3/pvq",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "type": "module",
   "main": "dist/cjs/pvq.js",
   "module": "dist/esm/pvq.js",
   "types": "dist/types/pvq.d.ts",
   "exports": {
     "require": "./dist/cjs/pvq.js",
-    "import": "./dist/esm/pvq.js"
+    "import": "./dist/esm/pvq.js",
+    "types": "./dist/types/pvq.d.ts"
   },
   "files": [
     "dist",

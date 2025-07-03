@@ -1,3 +1,4 @@
+"use client";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -19,10 +20,11 @@ import {
   removeProgramAtom,
 } from "@/lib/atoms";
 import { cn } from "@/lib/utils";
-import { compactAddLength, u8aToHex } from "@polkadot/util";
+import { u8aToHex } from "@polkadot/util";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useState } from "react";
 import { FileSelector } from "./FileSelector";
+import { useIsMounted } from "@/hooks/useIsMounted";
 
 export const SelectProgram = ({ className }: { className?: string }) => {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -33,13 +35,14 @@ export const SelectProgram = ({ className }: { className?: string }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [selectedMetadata, setSelectedMetadata] = useState<File | null>(null);
   const [currentProgram, setCurrentProgram] = useAtom(currentProgramAtom);
+  const isMounted = useIsMounted();
 
   // Add program
   const handleAddProgram = async () => {
     if (selectedFile && selectedMetadata) {
       const buffer = await selectedFile.arrayBuffer();
       const bytes = new Uint8Array(buffer);
-      const data = u8aToHex(compactAddLength(bytes));
+      const data = u8aToHex(bytes);
       let metadata: Record<string, unknown>;
       try {
         const text = await selectedMetadata.text();
@@ -79,7 +82,7 @@ export const SelectProgram = ({ className }: { className?: string }) => {
             <SelectValue placeholder="Select a program" />
           </SelectTrigger>
           <SelectContent>
-            {programs.length === 0 ? (
+            {!isMounted || programs.length === 0 ? (
               <div className="text-center p-8 text-gray-400">
                 No programs available
               </div>
@@ -92,7 +95,7 @@ export const SelectProgram = ({ className }: { className?: string }) => {
                 ))}
               </div>
             )}
-            <div className="sticky bottom-0 border-t flex justify-center p-2 pb-1 bg-popover z-10">
+            <div className="sticky bottom-0 border-t mt-2 flex justify-center p-2 pb-1 bg-popover z-10">
               <Button
                 variant="outline"
                 size="sm"
