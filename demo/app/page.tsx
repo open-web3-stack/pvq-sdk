@@ -1,10 +1,16 @@
 "use client";
+
+import { Connect } from "@/components/Connect";
+import { SelectProgram } from "@/components/SelectProgram";
 import { Card, CardContent } from "@/components/ui/card";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 import Link from "next/link";
-import { Connect } from "./Connect";
-import { SelectProgram } from "./SelectProgram";
+import { useState } from "react";
 
 export default function Home() {
+  const [tab, setTab] = useState("program");
+
   return (
     <div>
       <header className="border-b">
@@ -24,8 +30,13 @@ export default function Home() {
             <div className="flex-1 px-4">
               <Connect className="mt-2" />
               <SelectProgram className="mt-8" />
+              <Tabs value={tab} onValueChange={setTab} className="mt-8">
+                <TabsList>
+                  <TabsTrigger value="program">Program</TabsTrigger>
+                  <TabsTrigger value="password">Query</TabsTrigger>
+                </TabsList>
+              </Tabs>
             </div>
-            <div className="w-sm border-l px-4">Msg</div>
           </div>
         </CardContent>
       </Card>

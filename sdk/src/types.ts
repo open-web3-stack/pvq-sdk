@@ -1,6 +1,5 @@
 import type { PortableRegistry } from '@polkadot/types';
-import type { BTreeMap } from '@polkadot/types-codec';
-import type { Struct, Text, U32, U64, U8 } from '@polkadot/types-codec';
+import type { BTreeMap, Struct, Text, U32, U64 } from '@polkadot/types-codec';
 
 export interface FunctionParamMetadata extends Struct {
   name: Text;
@@ -13,12 +12,12 @@ export interface FunctionMetadata extends Struct {
   output: U32;
 };
 
+export type ExtensionIdTy = Text;
+
 export interface RuntimeMetadata extends Struct {
   types: PortableRegistry;
   extensions: BTreeMap<ExtensionIdTy, ExtensionMetadata>;
 };
-
-export type ExtensionIdTy = U64;
 
 export interface ExtensionMetadata extends Struct {
   name: Text;

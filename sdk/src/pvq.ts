@@ -48,7 +48,7 @@ export class PvqProgram {
 
       let finded = false;
       for (const [key, extension] of metadata.extensions.entries()) {
-        if (key.toHex() === id.toHex()) {
+        if (key.toString() === id.toString()) {
           finded = true;
           const extensionFn = extension.functions[fn.index];
           const { signature } = parseFunctionMetadata(extensionFn, registry);

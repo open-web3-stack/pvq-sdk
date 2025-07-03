@@ -9,7 +9,7 @@ export const typesDef = {
     inputs: 'Vec<FunctionParamMetadata>',
     output: 'Compact<u32>',
   },
-  ExtensionIdTy: 'u64',
+  ExtensionIdTy: 'Text',
   ExtensionMetadata: {
     name: 'Text',
     functions: 'Vec<FunctionMetadata>',

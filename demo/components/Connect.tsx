@@ -1,11 +1,11 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { apiAtom, apiConnectingAtom } from "@/lib/atoms";
+import { cn } from "@/lib/utils";
 import { ApiPromise, WsProvider } from "@polkadot/api";
 import { useAtom } from "jotai";
 import { useCallback, useState } from "react";
-import { apiAtom, apiConnectingAtom } from "./atoms";
-import { cn } from "@/lib/utils";
 
 const defaultEndpoint = "ws://127.0.0.1:8000";
 
@@ -59,7 +59,7 @@ export const Connect = ({ className }: { className?: string }) => {
   }, [api, setApi, setConnecting]);
 
   return (
-    <div className={cn(className, "")}>
+    <div className={cn(className, "select-none")}>
       <div className="font-bold">Custom Endpoint</div>
       <div className="flex space-x-2 mt-1">
         <Input

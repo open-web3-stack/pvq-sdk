@@ -12,17 +12,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { cn } from "@/lib/utils";
-import { useAtom, useAtomValue, useSetAtom } from "jotai";
-import { useState } from "react";
 import {
   addProgramAtom,
   currentProgramAtom,
   programsAtom,
   removeProgramAtom,
-} from "./atoms";
+} from "@/lib/atoms";
+import { cn } from "@/lib/utils";
+import { compactAddLength, u8aToHex } from "@polkadot/util";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
+import { useState } from "react";
 import { FileSelector } from "./FileSelector";
-import { u8aToHex, compactAddLength } from "@polkadot/util";
 
 export const SelectProgram = ({ className }: { className?: string }) => {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -57,6 +57,7 @@ export const SelectProgram = ({ className }: { className?: string }) => {
       });
       setSelectedFile(null);
       setSelectedMetadata(null);
+      setDialogOpen(false);
     }
   };
 
@@ -65,7 +66,7 @@ export const SelectProgram = ({ className }: { className?: string }) => {
   };
 
   return (
-    <div className={cn(className, "")}>
+    <div className={cn(className, "select-none")}>
       <div className="font-bold">Select program</div>
       <div className="flex space-x-2">
         <Select
@@ -127,6 +128,7 @@ export const SelectProgram = ({ className }: { className?: string }) => {
               setFile={setSelectedMetadata}
             />
             <Button
+              className="select-none"
               onClick={handleAddProgram}
               disabled={!selectedFile || !selectedMetadata}
               size="sm"
