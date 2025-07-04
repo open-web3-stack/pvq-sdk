@@ -189,15 +189,15 @@ export const Query = () => {
                               Error: {queryErrors[item.identifier]}
                             </span>
                           ) : queryResults[item.identifier] ? (
-                            <div className="flex flex-col gap-1">
-                              <div className="flex items-center gap-1 font-bold">
-                                result:{" "}
+                            <div className="flex flex-col gap-1 break-all">
+                              <div className="flex items-center gap-1 font-bold border-b mb-1 pb-2">
+                                [result]:{" "}
                                 {(
                                   queryResults[item.identifier] as any
                                 ).toJSON()}
                               </div>
                               <div className="flex items-center gap-1 font-bold">
-                                hex:{" "}
+                                [hex]:{" "}
                                 {(queryResults[item.identifier] as any).toHex()}
                               </div>
                             </div>
