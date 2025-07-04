@@ -8,13 +8,11 @@ import {
 import { apiAtom, currentProgramAtom } from "@/lib/atoms";
 import { ProgramRegistry, PvqProgram } from "@open-web3/pvq";
 import { useAtomValue } from "jotai";
+import { SnackbarProvider, enqueueSnackbar } from "notistack";
 import { useMemo, useState } from "react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
-import { SnackbarProvider, enqueueSnackbar } from "notistack";
-import { ChevronsRight } from "lucide-react";
-import { Textarea } from "./ui/textarea";
 
 const parseParam = (param: any) => {
   if (!param) return param;
@@ -200,9 +198,7 @@ export const Query = () => {
                               </div>
                               <div className="flex items-center gap-1 font-bold">
                                 hex:{" "}
-                                {(
-                                  queryResults[item.identifier] as any
-                                ).toHex()}
+                                {(queryResults[item.identifier] as any).toHex()}
                               </div>
                             </div>
                           ) : (
