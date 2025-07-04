@@ -14,6 +14,7 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { SnackbarProvider, enqueueSnackbar } from "notistack";
 import { ChevronsRight } from "lucide-react";
+import { Textarea } from "./ui/textarea";
 
 const parseParam = (param: any) => {
   if (!param) return param;
@@ -178,18 +179,11 @@ export const Query = () => {
                     </div>
                     {queryErrors[item.identifier] ||
                     queryResults[item.identifier] ? (
-                      <div>
-                        <div className="text-muted-foreground">
-                          [
-                          <span className="font-bold">
-                            {item.identifier} (
-                            {item.args.map((item) => item.name).join(", ")})
-                          </span>{" "}
-                          method Response ]{" "}
-                          <span className="font-bold">
-                            {item.returnType?.type}
-                          </span>{" "}
-                          :
+                      <div className="flex flex-col gap-1 bg-muted p-2 rounded-lg border">
+                        <div className="text-muted-foreground font-bold">
+                          [{item.identifier}(
+                          {item.args.map((item) => item.name).join(", ")}):{" "}
+                          {item.returnType?.type}] :
                         </div>
                         <div>
                           {queryErrors[item.identifier] ? (
@@ -197,9 +191,19 @@ export const Query = () => {
                               Error: {queryErrors[item.identifier]}
                             </span>
                           ) : queryResults[item.identifier] ? (
-                            <div className="flex items-center gap-1">
-                              <ChevronsRight className="text-[#e5e5e5]" />{" "}
-                              {(queryResults[item.identifier] as any).toHuman()}
+                            <div className="flex flex-col gap-1">
+                              <div className="flex items-center gap-1 font-bold">
+                                result:{" "}
+                                {(
+                                  queryResults[item.identifier] as any
+                                ).toJSON()}
+                              </div>
+                              <div className="flex items-center gap-1 font-bold">
+                                hex:{" "}
+                                {(
+                                  queryResults[item.identifier] as any
+                                ).toHex()}
+                              </div>
                             </div>
                           ) : (
                             "No result yet"
