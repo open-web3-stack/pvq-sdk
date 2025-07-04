@@ -94,7 +94,7 @@ export const Query = () => {
         })
       );
 
-      console.log(result);
+      console.log("result:", result);
       console.log(`Query for ${entrypointId}:`, entrypointData);
 
       setQueryResults((prev) => ({
@@ -191,13 +191,18 @@ export const Query = () => {
                           ) : queryResults[item.identifier] ? (
                             <div className="flex flex-col gap-1 break-all">
                               <div className="flex items-center gap-1 font-bold border-b mb-1 pb-2">
-                                [result]:{" "}
-                                {(
-                                  queryResults[item.identifier] as any
-                                ).toJSON()}
+                                {JSON.stringify(
+                                  (
+                                    queryResults[item.identifier] as any
+                                  ).toJSON(),
+                                  null,
+                                  2
+                                )}
                               </div>
-                              <div className="flex items-center gap-1 font-bold">
-                                [hex]:{" "}
+                              <div className="flZex items-center gap-1 font-bold">
+                                <span className="text-muted-foreground">
+                                  [hex]:{" "}
+                                </span>
                                 {(queryResults[item.identifier] as any).toHex()}
                               </div>
                             </div>
