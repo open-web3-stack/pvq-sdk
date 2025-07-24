@@ -1,15 +1,8 @@
 "use client";
 
 import { Connect } from "@/components/Connect";
-import { Card, CardContent } from "@/components/ui/card";
-import { ArrowDownIcon } from "lucide-react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import React, { useEffect, useMemo, useRef } from "react";
-import { SwapBox } from "./swapbox";
-import { useGetLpInfo } from "./useGetLpInfo";
-import { formatUnits, parseUnits } from "viem";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -17,7 +10,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ArrowDownUp } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import React, { useEffect, useMemo, useRef } from "react";
+import { formatUnits, parseUnits } from "viem";
+import { SwapBox } from "./swapbox";
+import { useGetLpInfo } from "./useGetLpInfo";
 
 export default function SwapPage() {
   const pathname = usePathname();
@@ -378,7 +378,7 @@ export default function SwapPage() {
                     onClick={handleSwitch}
                     className="cursor-pointer rounded-xl border border-border bg-card w-10 h-10 flex items-center justify-center shadow-md active:scale-95 transition-transform"
                   >
-                    <ArrowDownIcon className="w-6 h-6 text-foreground" />
+                    <ArrowDownUp className="w-6 h-6 text-foreground" />
                   </button>
                 </div>
                 <div>
