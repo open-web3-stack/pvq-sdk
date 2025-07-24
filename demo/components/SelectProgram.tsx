@@ -78,7 +78,7 @@ export const SelectProgram = ({ className }: { className?: string }) => {
           value={currentProgram?.id}
           onValueChange={(value) => setCurrentProgram(value)}
         >
-          <SelectTrigger className="w-full">
+          <SelectTrigger className="w-full h-12! text-md">
             <SelectValue placeholder="Select a program" />
           </SelectTrigger>
           <SelectContent>

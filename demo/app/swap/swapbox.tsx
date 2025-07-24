@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/select";
 import { useQueryAssetInfo } from "./useQueryAssetInfo";
 import { useEffect } from "react";
+import Image from "next/image";
 
 type SwapBoxProps = {
   title?: string;
@@ -48,7 +49,7 @@ export const SwapBox = ({
 
   return (
     <div
-      className={`select-none rounded-xl px-2.5 py-1.5 flex items-center relative h-14 ${highlight ? "bg-input/90 border border-primary/60" : "bg-input/30 border border-border"}`}
+      className={`select-none rounded-xl px-2.5 py-1.5 flex items-center relative h-14 ${highlight ? "bg-[#1f2125]/90 border border-muted-[#ffffff0b]" : "bg-input/30 border border-border"}`}
     >
       <Input
         type="number"
@@ -95,11 +96,18 @@ export const SwapBox = ({
             <SelectContent>
               {tokens?.map((assetId) => (
                 <SelectItem key={assetId} value={assetId}>
-                  <span className="w-5 h-5 rounded-full bg-blue-400 inline-flex items-center justify-center mr-0.5 align-middle">
+                  <Image
+                    className="w-5 h-5 inline-flex items-center justify-center mr-0.5 align-middle"
+                    src={`https://resources.acala.network/tokens/${assetInfo[assetId].symbol}.png`}
+                    alt={assetInfo[assetId].symbol}
+                    width={20}
+                    height={20}
+                  />
+                  {/* <span className="w-5 h-5 rounded-full bg-blue-400 inline-flex items-center justify-center mr-0.5 align-middle">
                     <span className="text-white font-bold text-xs">
                       {assetInfo[assetId].symbol[0]}
                     </span>
-                  </span>
+                  </span> */}
                   {assetInfo[assetId].symbol}
                 </SelectItem>
               ))}

@@ -10,6 +10,14 @@ import { SwapBox } from "./swapbox";
 import { useGetLpInfo } from "./useGetLpInfo";
 import { formatUnits, parseUnits } from "viem";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import Image from "next/image";
 
 export default function SwapPage() {
   const pathname = usePathname();
@@ -27,6 +35,7 @@ export default function SwapPage() {
   const [buyValue, setBuyValue] = React.useState("");
   const [sellToken, setSellToken] = React.useState("");
   const [buyToken, setBuyToken] = React.useState("");
+  const [selectedTokenPair, setSelectedTokenPair] = React.useState<string>("");
   const [activeBox, setActiveBox] = React.useState<"sell" | "buy" | undefined>(
     "sell"
   );
@@ -38,6 +47,40 @@ export default function SwapPage() {
     assetInfo,
     getPoolSize,
   } = useGetLpInfo();
+
+  const tokenPairOptions = useMemo(() => {
+    if (!assetInfo || !lpPoolList.length) return [];
+
+    return lpPoolList.map(([tokens]) => {
+      const token1 = tokens[0];
+      const token2 = tokens[1];
+      const symbol1 = assetInfo[token1]?.symbol || token1;
+      const symbol2 = assetInfo[token2]?.symbol || token2;
+      const pairKey = `${token1}-${token2}`;
+
+      return {
+        key: pairKey,
+        tokens: [token1, token2],
+        display: `${symbol1}-${symbol2}`,
+        symbols: [symbol1, symbol2],
+      };
+    });
+  }, [lpPoolList, assetInfo]);
+
+  // 当选择 token pair 时，自动设置 sell 和 buy token
+  useEffect(() => {
+    if (selectedTokenPair && assetInfo) {
+      const pair = tokenPairOptions.find(
+        (option) => option.key === selectedTokenPair
+      );
+      if (pair) {
+        setSellToken(pair.tokens[0]);
+        setBuyToken(pair.tokens[1]);
+        setSellValue("");
+        setBuyValue("");
+      }
+    }
+  }, [selectedTokenPair, tokenPairOptions, assetInfo]);
 
   const [sellTokens, buyTokens] = useMemo(() => {
     if (!sellToken && !buyToken) return [lpTokens, lpTokens];
@@ -156,22 +199,34 @@ export default function SwapPage() {
 
   const handleSellTokenChange = (token: string) => {
     setSellToken(token);
-    // if (activeBox === "sell") {
-    //   if (buyValue) {
-    //     setSellValue("");
-    //     setBuyValue("");
-    //   }
-    // }
+    if (buyToken) {
+      const pairKey = `${token}-${buyToken}`;
+      const reversePairKey = `${buyToken}-${token}`;
+      const existingPair = tokenPairOptions.find(
+        (option) => option.key === pairKey || option.key === reversePairKey
+      );
+      if (existingPair) {
+        setSelectedTokenPair(existingPair.key);
+      } else {
+        setSelectedTokenPair("");
+      }
+    }
   };
 
   const handleBuyTokenChange = (token: string) => {
     setBuyToken(token);
-    // if (activeBox === "buy") {
-    //   if (sellValue) {
-    //     setSellValue("");
-    //     setBuyValue("");
-    //   }
-    // }
+    if (sellToken) {
+      const pairKey = `${sellToken}-${token}`;
+      const reversePairKey = `${token}-${sellToken}`;
+      const existingPair = tokenPairOptions.find(
+        (option) => option.key === pairKey || option.key === reversePairKey
+      );
+      if (existingPair) {
+        setSelectedTokenPair(existingPair.key);
+      } else {
+        setSelectedTokenPair("");
+      }
+    }
   };
 
   const sellValueRef = useRef(sellValue);
@@ -267,6 +322,45 @@ export default function SwapPage() {
             <div className="flex-1 px-4">
               <Connect className="mt-2" />
               <div className="mt-8 flex flex-col gap-4">
+                {/* Token Pair Selector */}
+                <div>
+                  <div className="font-bold mb-2">Select Liquidity Pool</div>
+                  <Select
+                    value={selectedTokenPair}
+                    onValueChange={setSelectedTokenPair}
+                    disabled={!assetInfo || !tokenPairOptions.length}
+                  >
+                    <SelectTrigger className="w-full h-12! text-md">
+                      <SelectValue placeholder="Select a token pair" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {tokenPairOptions.map((option) => (
+                        <SelectItem key={option.key} value={option.key}>
+                          <div className="flex items-center gap-2 select-none">
+                            <div className="flex items-center gap-0">
+                              <Image
+                                className="w-5 h-5 inline-flex items-center justify-center align-middle"
+                                src={`https://resources.acala.network/tokens/${option.symbols[0]}.png`}
+                                alt={option.symbols[0]}
+                                width={20}
+                                height={20}
+                              />
+                              <Image
+                                className="ml-[-8px] w-5 h-5 inline-flex items-center justify-center align-middle"
+                                src={`https://resources.acala.network/tokens/${option.symbols[1]}.png`}
+                                alt={option.symbols[1]}
+                                width={20}
+                                height={20}
+                              />
+                            </div>
+                            <span className="font-bold">{option.display}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
                 <div>
                   <div className="font-bold">Sell</div>
                   <SwapBox
@@ -335,6 +429,7 @@ export default function SwapPage() {
                 </div>
                 <div>
                   <Button
+                    size="lg"
                     className="w-full cursor-pointer"
                     disabled={!sellValue || !buyValue || !tokenPair}
                   >
