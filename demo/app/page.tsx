@@ -8,9 +8,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 export default function Home() {
+  const pathname = usePathname();
   const [tab, setTab] = useState("program");
 
   return (
@@ -18,15 +20,21 @@ export default function Home() {
       <header className="border-b">
         <h1 className="text-3xl font-bold pt-6 pb-2 text-center">PVQ Demo</h1>
         <div className="mt-auto max-w-5xl mx-auto flex gap-4 font-semibold">
-          <Link href="/" className="p-4">
+          <Link
+            href="/"
+            className={`p-4 transition-colors ${pathname === "/" ? "text-primary font-bold underline" : "text-muted-foreground"}`}
+          >
             Home
           </Link>
-          {/* <Link href="/swap" className="p-4">
+          <Link
+            href="/swap"
+            className={`p-4 transition-colors ${pathname === "/swap" ? "text-primary font-bold underline" : "text-muted-foreground"}`}
+          >
             Swap
-          </Link> */}
+          </Link>
         </div>
       </header>
-      <Card className="mt-4 max-w-5xl mx-auto">
+      <Card className="mt-4 max-w-2xl mx-auto">
         <CardContent>
           <div className="flex">
             <div className="flex-1 px-4">

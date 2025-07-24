@@ -11,7 +11,7 @@ export const ProgramInfo = () => {
         <div className="mt-2">
           <Textarea
             readOnly
-            className="break-all max-h-[200px]"
+            className="break-all max-h-[160px]"
             defaultValue={currentProgram?.data}
           />
         </div>
@@ -21,7 +21,7 @@ export const ProgramInfo = () => {
         <div className="mt-2">
           <Textarea
             readOnly
-            className="break-all max-h-[200px]"
+            className="break-all max-h-[120px]"
             defaultValue={JSON.stringify(currentProgram?.metadata)}
           />
         </div>

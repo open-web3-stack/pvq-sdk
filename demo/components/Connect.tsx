@@ -12,7 +12,6 @@ const defaultEndpoint = "ws://127.0.0.1:8000";
 export const Connect = ({ className }: { className?: string }) => {
   const [api, setApi] = useAtom(apiAtom);
   const [connecting, setConnecting] = useAtom(apiConnectingAtom);
-
   const [value, setValue] = useState("");
   const [error, setError] = useState<Error | null>(null);
 
