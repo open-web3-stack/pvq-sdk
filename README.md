@@ -2,34 +2,33 @@
 
 A TypeScript SDK for interacting with PolkaVM Query (PVQ)
 
-
 ## Quick Start
 
 ```typescript
-import { ApiPromise } from '@polkadot/api';
-import { PvqProgram } from '@open-web3/pvq';
+import { ApiPromise } from "@polkadot/api";
+import { PvqProgram } from "@open-web3/pvq";
 
 // Connect to a Polkadot node
 const api = await ApiPromise.create({
-  provider: 'ws://localhost:9944'
+  provider: "ws://localhost:9944",
 });
 
 // Create PVQ program instance
 const program = new PvqProgram(
   api,
   guestProgramBytes, // Uint8Array or hex string
-  programMetadata    // Program metadata object
+  programMetadata // Program metadata object
 );
 
 // Execute a query
-const result = await program.entrypoint.sumBalance([
-  21, 
-  ['15oF4uVJwmo4TdGW7VfQxNLavjCXviqxT9S1MgbjMNHr6Sp5']
-], { 
-  gasLimit: 1000000000000000000n 
-});
+const result = await program.entrypoint.sumBalance(
+  [21, ["15oF4uVJwmo4TdGW7VfQxNLavjCXviqxT9S1MgbjMNHr6Sp5"]],
+  {
+    gasLimit: 1000000000000000000n,
+  }
+);
 
-console.log('Query result:', result);
+console.log("Query result:", result);
 ```
 
 ## Usage Examples
@@ -37,14 +36,14 @@ console.log('Query result:', result);
 ### Basic Program Execution
 
 ```typescript
-import { ApiPromise, WsProvider } from '@polkadot/api';
-import { PvqProgram } from '@open-web3/pvq';
+import { ApiPromise, WsProvider } from "@polkadot/api";
+import { PvqProgram } from "@open-web3/pvq";
 
 async function executeProgram() {
-  const provider = new WsProvider('ws://127.0.0.1:8000');
+  const provider = new WsProvider("ws://127.0.0.1:8000");
   const api = await ApiPromise.create({ provider });
 
-  const guestProgram = '0x...'; // Your program bytecode
+  const guestProgram = "0x..."; // Your program bytecode
   const metadata = {
     // Your program metadata
   };
@@ -53,10 +52,13 @@ async function executeProgram() {
 
   try {
     // Execute with default gas limit
-    const result = await program.entrypoint.sumBalance([21, ['15oF4uVJwmo4TdGW7VfQxNLavjCXviqxT9S1MgbjMNHr6Sp5']]);
-    console.log('Success:', result.toJSON());
+    const result = await program.entrypoint.sumBalance([
+      21,
+      ["15oF4uVJwmo4TdGW7VfQxNLavjCXviqxT9S1MgbjMNHr6Sp5"],
+    ]);
+    console.log("Success:", result.toJSON());
   } catch (error) {
-    console.error('Execution failed:', error);
+    console.error("Execution failed:", error);
   }
 
   await api.disconnect();
@@ -68,7 +70,7 @@ async function executeProgram() {
 ```typescript
 // Execute with custom gas limit
 const result = await program.entrypoint.sumBalance(
-  [21, ['15oF4uVJwmo4TdGW7VfQxNLavjCXviqxT9S1MgbjMNHr6Sp5']],
+  [21, ["15oF4uVJwmo4TdGW7VfQxNLavjCXviqxT9S1MgbjMNHr6Sp5"]],
   { gasLimit: 1000000000000000000n }
 );
 ```
@@ -77,7 +79,18 @@ const result = await program.entrypoint.sumBalance(
 
 ```typescript
 // Execute using entrypoint identifier
-const result = await program.executeQuery('sum_balance', { gasLimit: 1000000n }, [21, ['15oF4uVJwmo4TdGW7VfQxNLavjCXviqxT9S1MgbjMNHr6Sp5']]);
+const result = await program.executeQuery(
+  "sum_balance",
+  { gasLimit: 1000000n },
+  [21, ["15oF4uVJwmo4TdGW7VfQxNLavjCXviqxT9S1MgbjMNHr6Sp5"]]
+);
+
+// Execute with specific return type
+const typedResult = await program.executeQuery<u64>(
+  "sum_balance",
+  { gasLimit: 1000000n },
+  [21, ["15oF4uVJwmo4TdGW7VfQxNLavjCXviqxT9S1MgbjMNHr6Sp5"]]
+);
 ```
 
 ### Fetching Metadata
@@ -85,7 +98,7 @@ const result = await program.executeQuery('sum_balance', { gasLimit: 1000000n },
 ```typescript
 // Fetch metadata from the chain
 const metadata = await program.getMetadata();
-console.log('Chain metadata:', metadata);
+console.log("Chain metadata:", metadata);
 ```
 
 ### Checking Extensions
@@ -93,10 +106,10 @@ console.log('Chain metadata:', metadata);
 ```typescript
 // Check whether the program's extensions match the extensions on the current chain
 const matched = await program.checkExtensions();
-console.log('Extensions matched:', matched); // true or throws error if not matched
+console.log("Extensions matched:", matched); // true or throws error if not matched
 
 // You can also check the cached result
-console.log('Cached result:', program.extensionsMatched); // true/false/undefined
+console.log("Cached result:", program.extensionsMatched); // true/false/undefined
 ```
 
 ## API Reference
@@ -117,7 +130,7 @@ new PvqProgram(
 
 #### Methods
 
-- `executeQuery(entrypoint, options, params)` - Execute a query on the program
+- `executeQuery<T = Codec>(entrypoint, options, params)` - Execute a query on the program with optional return type specification
 - `checkExtensions()` - Check if required extensions are available
 - `getMetadata()` - Get runtime metadata
 

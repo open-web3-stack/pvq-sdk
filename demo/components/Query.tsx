@@ -13,6 +13,7 @@ import { useMemo, useState } from "react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
+import { Spinner } from "./ui/spinner";
 
 const parseParam = (param: any) => {
   if (!param) return param;
@@ -33,15 +34,19 @@ export const Query = () => {
   const [queryResults, setQueryResults] = useState<Record<string, unknown>>({});
   const [queryErrors, setQueryErrors] = useState<Record<string, string>>({});
 
+  const [isQuerying, setIsQuerying] = useState<{
+    [entrypointId: string]: boolean;
+  }>({});
+
   const programRegistry = useMemo(() => {
     if (currentProgram?.metadata) {
       return new ProgramRegistry(currentProgram?.metadata);
     }
   }, [currentProgram?.metadata]);
 
-  const defaultValues = useMemo(() => {
-    return programRegistry?.entrypoints.map((item) => item.identifier);
-  }, [programRegistry]);
+  // const defaultValues = useMemo(() => {
+  //   return programRegistry?.entrypoints.map((item) => item.identifier);
+  // }, [programRegistry]);
 
   const handleInputChange = (
     entrypointId: string,
@@ -77,6 +82,8 @@ export const Query = () => {
     setQueryErrors((prev) => ({ ...prev, [entrypointId]: "" }));
 
     try {
+      setIsQuerying((prev) => ({ ...prev, [entrypointId]: true }));
+
       const { gasLimit, ...entrypointData } = formData[entrypointId] || {};
 
       const program = new PvqProgram(
@@ -86,6 +93,7 @@ export const Query = () => {
       );
 
       const entrypoint = program.registry.findEntrypoint(entrypointId);
+
       const result = await program.executeQuery(
         entrypointId,
         { gasLimit: gasLimit || undefined },
@@ -107,6 +115,8 @@ export const Query = () => {
         ...prev,
         [entrypointId]: error instanceof Error ? error.message : String(error),
       }));
+    } finally {
+      setIsQuerying((prev) => ({ ...prev, [entrypointId]: false }));
     }
   };
 
@@ -115,13 +125,13 @@ export const Query = () => {
       {programRegistry && (
         <Accordion
           type="multiple"
-          defaultValue={defaultValues}
+          // defaultValue={defaultValues}
           className="w-full"
         >
           {programRegistry.entrypoints.map((item, index) => {
             return (
               <AccordionItem value={item.identifier} key={index}>
-                <AccordionTrigger className="text-md">
+                <AccordionTrigger className="text-md cursor-pointer font-bold flex">
                   {item.index + 1}. {item.identifier}
                 </AccordionTrigger>
                 <AccordionContent className="mt-2 flex flex-col gap-8 text-balance">
@@ -169,10 +179,18 @@ export const Query = () => {
                     <div>
                       <Button
                         size="sm"
-                        className="h-[24px] text-xs cursor-pointer rounded-sm"
+                        disabled={isQuerying[item.identifier]}
+                        className="h-[24px] text-xs cursor-pointer rounded-sm w-[64px]"
                         onClick={() => handleQuery(item.identifier)}
                       >
-                        Query
+                        {isQuerying[item.identifier] ? (
+                          <Spinner
+                            show={isQuerying[item.identifier]}
+                            className="text-background w-4.5 h-4.5"
+                          />
+                        ) : (
+                          "Query"
+                        )}
                       </Button>
                     </div>
                     {queryErrors[item.identifier] ||

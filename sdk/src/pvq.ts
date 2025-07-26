@@ -7,6 +7,7 @@ import { firstValueFrom } from 'rxjs'
 import { parseFunctionMetadata, ProgramRegistry, type Entrypoint } from './program-registry'
 import type { RuntimeMetadata } from './types'
 import { typesDef } from './typesdef'
+import type { Codec } from '@polkadot/types/types'
 
 function toCamelCase(str: string): string {
   return str.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase())
@@ -93,11 +94,19 @@ export class PvqProgram {
     return entrypointMap
   }
 
-  public async executeQuery(
+  /**
+   * Execute a query on the PVQ program
+   * @template T - The expected return type (defaults to Codec)
+   * @param entrypoint - The entrypoint identifier, Entrypoint object, or index
+   * @param options - Execution options including gas limit
+   * @param params - Parameters to pass to the entrypoint
+   * @returns Promise resolving to the query result of type T
+   */
+  public async executeQuery<T = Codec>(
     entrypoint: string | Entrypoint | number,
     { gasLimit = undefined }: ExecuteQueryOptions = {},
     params: unknown[],
-  ) {
+  ): Promise<T> {
     const matched = await this.checkExtensions()
     if (!matched) {
       throw new Error('Extensions check failed. Please ensure the required extensions are available.')
@@ -116,7 +125,7 @@ export class PvqProgram {
         const entry = this.registry.findEntrypoint(entrypoint)
         if (entry && entry.returnType) {
           const value = this.registry.registry.createType(entry.returnType.type, (result as any).asOk)
-          return value
+          return value as T
         } else {
           throw new Error('No return type found')
         }

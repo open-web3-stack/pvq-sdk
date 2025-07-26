@@ -15,8 +15,8 @@ importers:
   demo:
     dependencies:
       '@open-web3/pvq':
-        specifier: ^0.5.0
-        version: 0.5.0(@polkadot/api@16.2.1)(@polkadot/types-codec@16.2.1)(@polkadot/types@16.2.1)(@polkadot/util-crypto@13.5.2(@polkadot/util@13.5.1))(@polkadot/util@13.5.1)(rxjs@7.8.2)(typescript@5.8.3)
+        specifier: ^0.6.0
+        version: 0.6.0(@polkadot/api@16.2.1)(@polkadot/types-codec@16.2.1)(@polkadot/types@16.2.1)(@polkadot/util-crypto@13.5.2(@polkadot/util@13.5.1))(@polkadot/util@13.5.1)(rxjs@7.8.2)(typescript@5.8.3)
       '@polkadot/api':
         specifier: ^16.0.1
         version: 16.2.1
@@ -53,6 +53,9 @@ importers:
       jotai:
         specifier: ^2.12.4
         version: 2.12.5(@types/react@19.1.8)(react@19.1.0)
+      jotai-tanstack-query:
+        specifier: ^0.10.1
+        version: 0.10.1(@tanstack/query-core@5.83.0)(@tanstack/react-query@5.83.0(react@19.1.0))(jotai@2.12.5(@types/react@19.1.8)(react@19.1.0))(react@19.1.0)
       lucide-react:
         specifier: ^0.511.0
         version: 0.511.0(react@19.1.0)
@@ -621,8 +624,8 @@ packages:
     resolution: {integrity: sha512-nn5ozdjYQpUCZlWGuxcJY/KpxkWQs4DcbMCmKojjyrYDEAGy4Ce19NN4v5MduafTwJlbKc99UA8YhSVqq9yPZA==}
     engines: {node: '>=12.4.0'}
 
-  '@open-web3/pvq@0.5.0':
-    resolution: {integrity: sha512-HEq/+TQzUTLJV1jnRLKVsA0LEaz/fYCqMkh4YbOR63uTjm/sLnkB1gQyYy9J1g4ZbHkA2UeYhS4qFCl+oZtGug==}
+  '@open-web3/pvq@0.6.0':
+    resolution: {integrity: sha512-CjF533NRspP+XEqxtSgDIlTwljkVK3plopCM64NFbWLn7LbcdV3JyIemshGmUi0lbgIXMzT1/bmMEPSUsNcN5A==}
     peerDependencies:
       '@polkadot/api': '*'
       '@polkadot/types': '*'
@@ -2184,6 +2187,19 @@ packages:
     resolution: {integrity: sha512-rg9zJN+G4n2nfJl5MW3BMygZX56zKPNVEYYqq7adpmMh4Jn2QNEwhvQlFy6jPVdcod7txZtKHWnyZiA3a0zP7A==}
     hasBin: true
 
+  jotai-tanstack-query@0.10.1:
+    resolution: {integrity: sha512-DWhL408oB37Ryzd1XkPnJ+K/P/VB5si5w6XFNWXcUnnSN9mGzxXK3x7dcOyb3k0jz2pum1pchutsDPjb5TtStQ==}
+    peerDependencies:
+      '@tanstack/query-core': '*'
+      '@tanstack/react-query': '*'
+      jotai: '>=2.0.0'
+      react: ^18.0.0 || ^19.0.0
+    peerDependenciesMeta:
+      '@tanstack/react-query':
+        optional: true
+      react:
+        optional: true
+
   jotai@2.12.5:
     resolution: {integrity: sha512-G8m32HW3lSmcz/4mbqx0hgJIQ0ekndKWiYP7kWVKi0p6saLXdSoye+FZiOFyonnd7Q482LCzm8sMDl7Ar1NWDw==}
     engines: {node: '>=12.20.0'}
@@ -3282,7 +3298,7 @@ snapshots:
 
   '@nolyfill/is-core-module@1.0.39': {}
 
-  '@open-web3/pvq@0.5.0(@polkadot/api@16.2.1)(@polkadot/types-codec@16.2.1)(@polkadot/types@16.2.1)(@polkadot/util-crypto@13.5.2(@polkadot/util@13.5.1))(@polkadot/util@13.5.1)(rxjs@7.8.2)(typescript@5.8.3)':
+  '@open-web3/pvq@0.6.0(@polkadot/api@16.2.1)(@polkadot/types-codec@16.2.1)(@polkadot/types@16.2.1)(@polkadot/util-crypto@13.5.2(@polkadot/util@13.5.1))(@polkadot/util@13.5.1)(rxjs@7.8.2)(typescript@5.8.3)':
     dependencies:
       '@polkadot/api': 16.2.1
       '@polkadot/types': 16.2.1
@@ -5251,6 +5267,14 @@ snapshots:
       set-function-name: 2.0.2
 
   jiti@2.4.2: {}
+
+  jotai-tanstack-query@0.10.1(@tanstack/query-core@5.83.0)(@tanstack/react-query@5.83.0(react@19.1.0))(jotai@2.12.5(@types/react@19.1.8)(react@19.1.0))(react@19.1.0):
+    dependencies:
+      '@tanstack/query-core': 5.83.0
+      jotai: 2.12.5(@types/react@19.1.8)(react@19.1.0)
+    optionalDependencies:
+      '@tanstack/react-query': 5.83.0(react@19.1.0)
+      react: 19.1.0
 
   jotai@2.12.5(@types/react@19.1.8)(react@19.1.0):
     optionalDependencies:

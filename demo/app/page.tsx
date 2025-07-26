@@ -6,14 +6,17 @@ import { Query } from "@/components/Query";
 import { SelectProgram } from "@/components/SelectProgram";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAtom } from "jotai";
 
+import { atomWithStorage } from "jotai/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+
+const tabAtom = atomWithStorage("tab", "program");
 
 export default function Home() {
   const pathname = usePathname();
-  const [tab, setTab] = useState("program");
+  const [tab, setTab] = useAtom(tabAtom);
 
   return (
     <div>

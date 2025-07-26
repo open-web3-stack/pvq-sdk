@@ -18,9 +18,14 @@ import React, { useEffect, useMemo, useRef } from "react";
 import { formatUnits, parseUnits } from "viem";
 import { SwapBox } from "./swapbox";
 import { useGetLpInfo } from "./useGetLpInfo";
+import { poolListAtom } from "./atoms";
+import { useAtomValue } from "jotai";
 
 export default function SwapPage() {
   const pathname = usePathname();
+  const poolList = useAtomValue(poolListAtom);
+
+  console.log(poolList);
   const [poolSize, setPoolSize] = React.useState<
     | [
         {
@@ -67,7 +72,6 @@ export default function SwapPage() {
     });
   }, [lpPoolList, assetInfo]);
 
-  // 当选择 token pair 时，自动设置 sell 和 buy token
   useEffect(() => {
     if (selectedTokenPair && assetInfo) {
       const pair = tokenPairOptions.find(

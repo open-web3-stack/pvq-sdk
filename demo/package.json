@@ -11,7 +11,7 @@
     "deploy": "npm run build && touch out/.nojekyll"
   },
   "dependencies": {
-    "@open-web3/pvq": "^0.5.0",
+    "@open-web3/pvq": "^0.6.0",
     "@polkadot/api": "^16.0.1",
     "@polkadot/util": "^13.5.1",
     "@radix-ui/react-accordion": "^1.2.11",
@@ -24,6 +24,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "jotai": "^2.12.4",
+    "jotai-tanstack-query": "^0.10.1",
     "lucide-react": "^0.511.0",
     "next": "15.3.2",
     "next-themes": "^0.4.6",
