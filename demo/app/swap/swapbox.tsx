@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -7,9 +6,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useQueryAssetInfo } from "./useQueryAssetInfo";
-import { useEffect } from "react";
+import { useAtomValue, useStore } from "jotai";
 import Image from "next/image";
+import { useEffect } from "react";
+import { assetsInfoAtom, assetsInfoFamily } from "./atoms";
 
 type SwapBoxProps = {
   title?: string;
@@ -36,10 +36,11 @@ export const SwapBox = ({
   readOnly = false,
   highlight = false,
   onFocus,
-  onBlur,
+  // onBlur,
   tokens,
 }: SwapBoxProps) => {
-  const { data: assetInfo } = useQueryAssetInfo();
+  const assetInfo = useAtomValue(assetsInfoAtom);
+  const store = useStore();
 
   useEffect(() => {
     if (!token) return;
@@ -94,23 +95,27 @@ export const SwapBox = ({
           </SelectTrigger>
           {assetInfo && (
             <SelectContent>
-              {tokens?.map((assetId) => (
-                <SelectItem key={assetId} value={assetId}>
-                  <Image
-                    className="w-5 h-5 inline-flex items-center justify-center mr-0.5 align-middle"
-                    src={`https://resources.acala.network/tokens/${assetInfo[assetId].symbol}.png`}
-                    alt={assetInfo[assetId].symbol}
-                    width={20}
-                    height={20}
-                  />
-                  {/* <span className="w-5 h-5 rounded-full bg-blue-400 inline-flex items-center justify-center mr-0.5 align-middle">
+              {tokens?.map((assetId) => {
+                const assetInfo = store.get(assetsInfoFamily(assetId));
+
+                return (
+                  <SelectItem key={assetId} value={assetId}>
+                    <Image
+                      className="w-5 h-5 inline-flex items-center justify-center mr-0.5 align-middle"
+                      src={`https://resources.acala.network/tokens/${assetInfo?.symbol.toUpperCase()}.png`}
+                      alt={assetInfo?.symbol || ""}
+                      width={20}
+                      height={20}
+                    />
+                    {/* <span className="w-5 h-5   rounded-full bg-blue-400 inline-flex items-center justify-center mr-0.5 align-middle">
                     <span className="text-white font-bold text-xs">
-                      {assetInfo[assetId].symbol[0]}
+                      {assetInfo.symbol[0]}
                     </span>
                   </span> */}
-                  {assetInfo[assetId].symbol}
-                </SelectItem>
-              ))}
+                    {assetInfo?.symbol}
+                  </SelectItem>
+                );
+              })}
             </SelectContent>
           )}
         </Select>

@@ -15,8 +15,8 @@ importers:
   demo:
     dependencies:
       '@open-web3/pvq':
-        specifier: ^0.6.0
-        version: 0.6.0(@polkadot/api@16.2.1)(@polkadot/types-codec@16.2.1)(@polkadot/types@16.2.1)(@polkadot/util-crypto@13.5.2(@polkadot/util@13.5.1))(@polkadot/util@13.5.1)(rxjs@7.8.2)(typescript@5.8.3)
+        specifier: ^0.7.0
+        version: 0.7.0(@polkadot/api@16.2.1)(@polkadot/types-codec@16.2.1)(@polkadot/types@16.2.1)(@polkadot/util-crypto@13.5.2(@polkadot/util@13.5.1))(@polkadot/util@13.5.1)(rxjs@7.8.2)(typescript@5.8.3)
       '@polkadot/api':
         specifier: ^16.0.1
         version: 16.2.1
@@ -624,8 +624,8 @@ packages:
     resolution: {integrity: sha512-nn5ozdjYQpUCZlWGuxcJY/KpxkWQs4DcbMCmKojjyrYDEAGy4Ce19NN4v5MduafTwJlbKc99UA8YhSVqq9yPZA==}
     engines: {node: '>=12.4.0'}
 
-  '@open-web3/pvq@0.6.0':
-    resolution: {integrity: sha512-CjF533NRspP+XEqxtSgDIlTwljkVK3plopCM64NFbWLn7LbcdV3JyIemshGmUi0lbgIXMzT1/bmMEPSUsNcN5A==}
+  '@open-web3/pvq@0.7.0':
+    resolution: {integrity: sha512-Lntxwa3o5cgPvTrL1ZYioP1CjiQmdI5knUlYVbv5Ra13GZM/Q7OYoTV/X+z5KlPOYxB4H/gG4XllzvS+kMbi3A==}
     peerDependencies:
       '@polkadot/api': '*'
       '@polkadot/types': '*'
@@ -3298,7 +3298,7 @@ snapshots:
 
   '@nolyfill/is-core-module@1.0.39': {}
 
-  '@open-web3/pvq@0.6.0(@polkadot/api@16.2.1)(@polkadot/types-codec@16.2.1)(@polkadot/types@16.2.1)(@polkadot/util-crypto@13.5.2(@polkadot/util@13.5.1))(@polkadot/util@13.5.1)(rxjs@7.8.2)(typescript@5.8.3)':
+  '@open-web3/pvq@0.7.0(@polkadot/api@16.2.1)(@polkadot/types-codec@16.2.1)(@polkadot/types@16.2.1)(@polkadot/util-crypto@13.5.2(@polkadot/util@13.5.1))(@polkadot/util@13.5.1)(rxjs@7.8.2)(typescript@5.8.3)':
     dependencies:
       '@polkadot/api': 16.2.1
       '@polkadot/types': 16.2.1

@@ -10,94 +10,74 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useAtomValue, useSetAtom } from "jotai";
 import { ArrowDownUp } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import React, { useEffect, useMemo, useRef } from "react";
-import { formatUnits, parseUnits } from "viem";
+import React, { useMemo, useTransition } from "react";
+import {
+  assetsInfoAtom,
+  getReceiveAmountAtom,
+  poolListDetailAtom,
+  poolSizeAtom,
+  selectedPoolAtom,
+  selectedPoolInfoAtom,
+} from "./atoms";
 import { SwapBox } from "./swapbox";
-import { useGetLpInfo } from "./useGetLpInfo";
-import { poolListAtom } from "./atoms";
-import { useAtomValue } from "jotai";
 
 export default function SwapPage() {
   const pathname = usePathname();
-  const poolList = useAtomValue(poolListAtom);
+  const selectedPoolInfo = useAtomValue(selectedPoolInfoAtom);
+  const setSelectedPool = useSetAtom(selectedPoolAtom);
+  const { data: assetInfo } = useAtomValue(assetsInfoAtom);
+  const { data: poolListDetail } = useAtomValue(poolListDetailAtom);
+  const { data: poolSize } = useAtomValue(poolSizeAtom);
 
-  console.log(poolList);
-  const [poolSize, setPoolSize] = React.useState<
-    | [
-        {
-          symbol: string;
-          value: string;
-        },
-        { symbol: string; value: string },
-      ]
-    | undefined
-  >(undefined);
   const [sellValue, setSellValue] = React.useState("");
   const [buyValue, setBuyValue] = React.useState("");
   const [sellToken, setSellToken] = React.useState("");
   const [buyToken, setBuyToken] = React.useState("");
-  const [selectedTokenPair, setSelectedTokenPair] = React.useState<string>("");
+  const [isSwapLoading, setIsSwapLoading] = React.useState(false);
   const [activeBox, setActiveBox] = React.useState<"sell" | "buy" | undefined>(
     "sell"
   );
-  const {
-    lpTokens,
-    lpPoolList,
-    getExactBuyAmount,
-    getExactSellAmount,
-    assetInfo,
-    getPoolSize,
-  } = useGetLpInfo();
+
+  const getReceiveAmount = useAtomValue(getReceiveAmountAtom);
+  const [, startTransition] = useTransition();
 
   const tokenPairOptions = useMemo(() => {
-    if (!assetInfo || !lpPoolList.length) return [];
+    if (!assetInfo || !poolListDetail) return [];
 
-    return lpPoolList.map(([tokens]) => {
-      const token1 = tokens[0];
-      const token2 = tokens[1];
-      const symbol1 = assetInfo[token1]?.symbol || token1;
-      const symbol2 = assetInfo[token2]?.symbol || token2;
-      const pairKey = `${token1}-${token2}`;
+    return poolListDetail.map(({ asset1, asset2, key }) => {
+      const token1 = asset1.assetId;
+      const token2 = asset2.assetId;
+      const symbol1 = asset1.symbol;
+      const symbol2 = asset2.symbol;
 
       return {
-        key: pairKey,
+        key,
         tokens: [token1, token2],
         display: `${symbol1}-${symbol2}`,
         symbols: [symbol1, symbol2],
       };
     });
-  }, [lpPoolList, assetInfo]);
-
-  useEffect(() => {
-    if (selectedTokenPair && assetInfo) {
-      const pair = tokenPairOptions.find(
-        (option) => option.key === selectedTokenPair
-      );
-      if (pair) {
-        setSellToken(pair.tokens[0]);
-        setBuyToken(pair.tokens[1]);
-        setSellValue("");
-        setBuyValue("");
-      }
-    }
-  }, [selectedTokenPair, tokenPairOptions, assetInfo]);
+  }, [poolListDetail, assetInfo]);
 
   const [sellTokens, buyTokens] = useMemo(() => {
-    if (!sellToken && !buyToken) return [lpTokens, lpTokens];
+    const allTokens = assetInfo?.map((asset) => asset.assetId) ?? [];
+    if (!sellToken && !buyToken) return [allTokens, allTokens];
     if (activeBox === "sell") {
       return [
-        lpTokens,
+        allTokens,
         [
           ...new Set(
-            lpPoolList
-              .filter(
-                ([tokens]) => tokens[0] === sellToken || tokens[1] === sellToken
+            poolListDetail
+              ?.filter(
+                ({ asset1, asset2 }) =>
+                  asset1.assetId === sellToken || asset2.assetId === sellToken
               )
-              .flatMap(([tokens]) => tokens)
+              .flatMap(({ asset1, asset2 }) => [asset1.assetId, asset2.assetId])
               .filter((token) => token !== sellToken)
           ),
         ],
@@ -107,97 +87,94 @@ export default function SwapPage() {
       return [
         [
           ...new Set(
-            lpPoolList
-              .filter(
-                ([tokens]) => tokens[0] === buyToken || tokens[1] === buyToken
+            poolListDetail
+              ?.filter(
+                ({ asset1, asset2 }) =>
+                  asset1.assetId === buyToken || asset2.assetId === buyToken
               )
-              .flatMap(([tokens]) => tokens)
+              .flatMap(({ asset1, asset2 }) => [asset1.assetId, asset2.assetId])
               .filter((token) => token !== buyToken)
           ),
         ],
-        lpTokens,
+        allTokens,
       ];
-    return [lpTokens, lpTokens];
-  }, [sellToken, lpTokens, buyToken, activeBox, lpPoolList]);
 
-  const tokenPair = useMemo(() => {
-    if (!sellToken || !buyToken || !lpPoolList.length) return undefined;
-    const pair1 = lpPoolList.find(
-      ([tokens]) => tokens[0] === sellToken && tokens[1] === buyToken
+    return [allTokens, allTokens];
+  }, [sellToken, buyToken, activeBox, poolListDetail, assetInfo]);
+
+  const handleChangeSelectedPool = (key: string) => {
+    setSelectedPool(key);
+    setSellToken(
+      poolListDetail?.find((pool) => pool.key === key)?.asset1.assetId || ""
     );
-    const pair2 = lpPoolList.find(
-      ([tokens]) => tokens[0] === buyToken && tokens[1] === sellToken
+    setBuyToken(
+      poolListDetail?.find((pool) => pool.key === key)?.asset2.assetId || ""
     );
-    const pair = pair1 || pair2;
-    return pair?.[0];
-  }, [sellToken, buyToken, lpPoolList]);
+    setSellValue("");
+    setBuyValue("");
+  };
 
   const handleSwitch = () => {
-    if (!tokenPair) return;
+    if (!selectedPoolInfo) return;
     setSellValue(buyValue);
     setBuyValue(sellValue);
     setSellToken(buyToken);
     setBuyToken(sellToken);
     const nextBox = activeBox === "sell" ? "buy" : "sell";
     setActiveBox(nextBox);
-    const amount = nextBox === "sell" ? buyValue : sellValue;
 
-    if (nextBox === "sell") {
-      getExactBuyAmount(
-        tokenPair[0],
-        tokenPair[1],
-        parseUnits(amount, assetInfo![buyToken].decimals)
-      ).then((v) => {
-        setBuyValue(formatUnits(v, assetInfo![sellToken].decimals));
+    console.log(buyToken, sellToken, nextBox === "sell" ? buyValue : sellValue);
+    setIsSwapLoading(true);
+    getReceiveAmount(
+      buyToken,
+      sellToken,
+      nextBox === "sell" ? buyValue : sellValue,
+      nextBox === "sell"
+    )
+      .then((v) => {
+        if (nextBox === "sell") {
+          setBuyValue(v);
+        } else {
+          setSellValue(v);
+        }
+      })
+      .finally(() => {
+        setIsSwapLoading(false);
       });
-    } else {
-      getExactSellAmount(
-        tokenPair[0],
-        tokenPair[1],
-        parseUnits(amount, assetInfo![sellToken].decimals)
-      ).then((v) => {
-        setSellValue(formatUnits(v, assetInfo![buyToken].decimals));
-      });
-    }
+
+    // if (nextBox === "sell") {
+    //   getReceiveAmount(
+    //     selectedPoolInfo.asset1.assetId,
+    //     selectedPoolInfo.asset2.assetId,
+    //     amount
+    //   ).then((v) => {
+    //     setBuyValue(v);
+    //   });
+    // } else {
+    //   getReceiveAmount(
+    //     selectedPoolInfo.asset1.assetId,
+    //     selectedPoolInfo.asset2.assetId,
+    //     amount
+    //   ).then((v) => {
+    //     setSellValue(v);
+    //   });
+    // }
   };
 
-  const handleSellChange = (v: string) => {
-    setSellValue(v);
-    if (
-      !tokenPair ||
-      !sellToken ||
-      !buyToken ||
-      !assetInfo?.[sellToken]?.decimals ||
-      !assetInfo?.[buyToken]?.decimals
-    )
-      return;
-
-    getExactBuyAmount(
-      tokenPair[0],
-      tokenPair[1],
-      parseUnits(v, assetInfo[sellToken].decimals)
-    ).then((v) => {
-      setBuyValue(formatUnits(v, assetInfo[buyToken].decimals));
+  const handleSellChange = (amount: string) => {
+    setSellValue(amount);
+    if (!selectedPoolInfo || !sellToken || !buyToken) return;
+    getReceiveAmount(sellToken, buyToken, amount, true).then((result) => {
+      setBuyValue(result);
     });
   };
 
-  const handleBuyChange = (v: string) => {
-    setBuyValue(v);
-    if (
-      !tokenPair ||
-      !sellToken ||
-      !buyToken ||
-      !assetInfo?.[buyToken]?.decimals ||
-      !assetInfo?.[sellToken]?.decimals
-    )
-      return;
+  const handleBuyChange = (amount: string) => {
+    setBuyValue(amount);
+    if (!selectedPoolInfo || !sellToken || !buyToken) return;
 
-    getExactSellAmount(
-      tokenPair[0],
-      tokenPair[1],
-      parseUnits(v, assetInfo[buyToken].decimals)
-    ).then((v) => {
-      setSellValue(formatUnits(v, assetInfo[sellToken].decimals));
+    getReceiveAmount(sellToken, buyToken, amount, false).then((result) => {
+      setSellValue(result);
     });
   };
 
@@ -210,9 +187,26 @@ export default function SwapPage() {
         (option) => option.key === pairKey || option.key === reversePairKey
       );
       if (existingPair) {
-        setSelectedTokenPair(existingPair.key);
+        setSelectedPool(existingPair.key);
+        startTransition(() => {
+          const amount = activeBox === "sell" ? sellValue : buyValue;
+          if (amount && sellToken) {
+            getReceiveAmount(
+              buyToken,
+              token,
+              amount,
+              activeBox === "sell"
+            ).then((result) => {
+              if (activeBox === "sell") {
+                setBuyValue(result);
+              } else {
+                setSellValue(result);
+              }
+            });
+          }
+        });
       } else {
-        setSelectedTokenPair("");
+        setSelectedPool("");
       }
     }
   };
@@ -226,80 +220,29 @@ export default function SwapPage() {
         (option) => option.key === pairKey || option.key === reversePairKey
       );
       if (existingPair) {
-        setSelectedTokenPair(existingPair.key);
+        setSelectedPool(existingPair.key);
+        startTransition(() => {
+          const amount = activeBox === "sell" ? sellValue : buyValue;
+          if (amount && sellToken) {
+            getReceiveAmount(
+              sellToken,
+              token,
+              amount,
+              activeBox === "sell"
+            ).then((result) => {
+              if (activeBox === "sell") {
+                setBuyValue(result);
+              } else {
+                setSellValue(result);
+              }
+            });
+          }
+        });
       } else {
-        setSelectedTokenPair("");
+        setSelectedPool("");
       }
     }
   };
-
-  const sellValueRef = useRef(sellValue);
-  sellValueRef.current = sellValue;
-  const buyValueRef = useRef(buyValue);
-  buyValueRef.current = buyValue;
-  const activeBoxRef = useRef(activeBox);
-  activeBoxRef.current = activeBox;
-  const assetInfoRef = useRef(assetInfo);
-  assetInfoRef.current = assetInfo;
-  const sellTokenRef = useRef(sellToken);
-  sellTokenRef.current = sellToken;
-  const buyTokenRef = useRef(buyToken);
-  buyTokenRef.current = buyToken;
-
-  useEffect(() => {
-    if (tokenPair) {
-      const func =
-        activeBoxRef.current === "sell"
-          ? getExactBuyAmount
-          : getExactSellAmount;
-      const amount =
-        activeBoxRef.current === "sell"
-          ? sellValueRef.current
-          : buyValueRef.current;
-      const token =
-        activeBoxRef.current === "sell"
-          ? sellTokenRef.current
-          : buyTokenRef.current;
-
-      if (!amount || !token) return;
-      func(
-        tokenPair[0],
-        tokenPair[1],
-        parseUnits(amount, assetInfoRef.current![token].decimals)
-      ).then((v) => {
-        const setFunc =
-          activeBoxRef.current === "sell" ? setBuyValue : setSellValue;
-        setFunc(
-          formatUnits(
-            v,
-            assetInfoRef.current![
-              activeBoxRef.current === "sell"
-                ? buyTokenRef.current
-                : sellTokenRef.current
-            ].decimals
-          )
-        );
-      });
-    }
-  }, [tokenPair, getExactBuyAmount, getExactSellAmount]);
-
-  useEffect(() => {
-    if (tokenPair) {
-      getPoolSize(tokenPair).then((result) => {
-        if (!result) return;
-        setPoolSize([
-          {
-            symbol: assetInfo![tokenPair[0]].symbol,
-            value: formatUnits(result[0], assetInfo![tokenPair[0]].decimals),
-          },
-          {
-            symbol: assetInfo![tokenPair[1]].symbol,
-            value: formatUnits(result[1], assetInfo![tokenPair[1]].decimals),
-          },
-        ]);
-      });
-    }
-  }, [tokenPair, getPoolSize, assetInfo]);
 
   return (
     <div>
@@ -330,8 +273,8 @@ export default function SwapPage() {
                 <div>
                   <div className="font-bold mb-2">Select Liquidity Pool</div>
                   <Select
-                    value={selectedTokenPair}
-                    onValueChange={setSelectedTokenPair}
+                    value={selectedPoolInfo?.key}
+                    onValueChange={handleChangeSelectedPool}
                     disabled={!assetInfo || !tokenPairOptions.length}
                   >
                     <SelectTrigger className="w-full h-12! text-md">
@@ -344,14 +287,14 @@ export default function SwapPage() {
                             <div className="flex items-center gap-0">
                               <Image
                                 className="w-5 h-5 inline-flex items-center justify-center align-middle"
-                                src={`https://resources.acala.network/tokens/${option.symbols[0]}.png`}
+                                src={`https://resources.acala.network/tokens/${option.symbols[0].toUpperCase()}.png`}
                                 alt={option.symbols[0]}
                                 width={20}
                                 height={20}
                               />
                               <Image
                                 className="ml-[-8px] w-5 h-5 inline-flex items-center justify-center align-middle"
-                                src={`https://resources.acala.network/tokens/${option.symbols[1]}.png`}
+                                src={`https://resources.acala.network/tokens/${option.symbols[1].toUpperCase()}.png`}
                                 alt={option.symbols[1]}
                                 width={20}
                                 height={20}
@@ -381,6 +324,7 @@ export default function SwapPage() {
                   <button
                     onClick={handleSwitch}
                     className="cursor-pointer rounded-xl border border-border bg-card w-10 h-10 flex items-center justify-center shadow-md active:scale-95 transition-transform"
+                    disabled={isSwapLoading}
                   >
                     <ArrowDownUp className="w-6 h-6 text-foreground" />
                   </button>
@@ -404,9 +348,9 @@ export default function SwapPage() {
                     </div>
                     {poolSize ? (
                       <div className="flex gap-1">
-                        {poolSize[0].value} {poolSize[0].symbol}
+                        {poolSize.asset1Amount} {poolSize.asset1.symbol}
                         <span className="text-muted-foreground">+</span>
-                        {poolSize[1].value} {poolSize[1].symbol}
+                        {poolSize.asset2Amount} {poolSize.asset2.symbol}
                       </div>
                     ) : (
                       <div className="text-muted-foreground">--</div>
@@ -416,15 +360,10 @@ export default function SwapPage() {
                     <div className="font-bold text-muted-foreground">Price</div>
                     {poolSize ? (
                       <div className="flex gap-1">
-                        {1} {poolSize[0].symbol}
+                        {1} {poolSize.asset1.symbol}
                         <span className="text-muted-foreground">=</span>
-                        {Number(
-                          (
-                            Number(poolSize[1].value) /
-                            Number(poolSize[0].value)
-                          ).toFixed(4)
-                        )}{" "}
-                        {poolSize[1].symbol}
+                        {poolSize.price}
+                        {poolSize.asset2.symbol}
                       </div>
                     ) : (
                       <div className="text-muted-foreground">--</div>
@@ -435,7 +374,7 @@ export default function SwapPage() {
                   <Button
                     size="lg"
                     className="w-full cursor-pointer"
-                    disabled={!sellValue || !buyValue || !tokenPair}
+                    disabled={!sellValue || !buyValue || !selectedPoolInfo}
                   >
                     Swap
                   </Button>
