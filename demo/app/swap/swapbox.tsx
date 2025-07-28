@@ -1,3 +1,4 @@
+import { ImageWithFallback } from "@/components/ImageWithFallback";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -7,7 +8,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useAtomValue, useStore } from "jotai";
-import Image from "next/image";
 import { useEffect } from "react";
 import { assetsInfoAtom, assetsInfoFamily } from "./atoms";
 
@@ -74,7 +74,7 @@ export const SwapBox = ({
       >
         <Select
           disabled={!assetInfo || !tokens?.length}
-          value={token}
+          value={token || ""}
           onValueChange={onTokenChange}
         >
           <SelectTrigger
@@ -94,24 +94,21 @@ export const SwapBox = ({
             )}
           </SelectTrigger>
           {assetInfo && (
-            <SelectContent>
+            <SelectContent scrollAble>
               {tokens?.map((assetId) => {
                 const assetInfo = store.get(assetsInfoFamily(assetId));
 
                 return (
                   <SelectItem key={assetId} value={assetId}>
-                    <Image
+                    <ImageWithFallback
                       className="w-5 h-5 inline-flex items-center justify-center mr-0.5 align-middle"
                       src={`https://resources.acala.network/tokens/${assetInfo?.symbol.toUpperCase()}.png`}
                       alt={assetInfo?.symbol || ""}
                       width={20}
                       height={20}
+                      fallback={assetInfo?.symbol.slice(0, 1)}
+                      fallbackClassName="rounded-full bg-blue-400 font-bold"
                     />
-                    {/* <span className="w-5 h-5   rounded-full bg-blue-400 inline-flex items-center justify-center mr-0.5 align-middle">
-                    <span className="text-white font-bold text-xs">
-                      {assetInfo.symbol[0]}
-                    </span>
-                  </span> */}
                     {assetInfo?.symbol}
                   </SelectItem>
                 );

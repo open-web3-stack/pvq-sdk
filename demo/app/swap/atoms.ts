@@ -1,14 +1,21 @@
-import { formatUnits, parseUnits } from "viem";
 import { apiAtom } from "@/lib/atoms";
 import { PvqProgram } from "@open-web3/pvq";
+import type { Option, u128, Vec } from "@polkadot/types";
+import type { ITuple } from "@polkadot/types/types";
+import { u8aToString } from "@polkadot/util";
 import { atom } from "jotai";
 import { atomWithQuery } from "jotai-tanstack-query";
+import { atomFamily } from "jotai/utils";
+import { formatUnits, parseUnits } from "viem";
 import { guestSwapInfoProgram } from "./assets/guest-swap-info";
 import metadata from "./assets/guest-swap-info-metadata.json";
-import type { Bytes, Vec, Option, u128 } from "@polkadot/types";
-import type { Codec, ITuple } from "@polkadot/types/types";
-import { compactStripLength, u8aToString } from "@polkadot/util";
-import { atomFamily } from "jotai/utils";
+
+type AssetInfo = {
+  assetId: string;
+  decimals: number;
+  name: string;
+  symbol: string;
+};
 
 export const lpProgramAtom = atom<PvqProgram | null>((get) => {
   const api = get(apiAtom);
@@ -18,122 +25,81 @@ export const lpProgramAtom = atom<PvqProgram | null>((get) => {
 
 export const poolListAtom = atomWithQuery((get) => ({
   queryKey: ["poolList"],
+  onError: (error: Error) => {
+    console.error("Error fetching pool list", error.message);
+  },
+  throwOnError: true,
+  retry: false,
   queryFn: async () => {
+    console.log("fetching pool list");
     const program = get(lpProgramAtom);
     if (!program) throw new Error("Program not initialized");
-    const lpList = await program.executeQuery<Vec<ITuple<[Bytes, Bytes]>>>(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const lpList = await program.executeQuery<Vec<ITuple<[any, any]>>>(
       "entrypoint_list_pools",
       undefined,
       []
     );
-    return lpList.map(
-      ([assetId1, assetId2]) => [assetId1.toHex(), assetId2.toHex()] as const
-    );
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const getAssetInfo = (asset: any): AssetInfo => {
+      return {
+        assetId: asset.assetId.toHex() as string,
+        decimals: asset.decimals.toNumber() as number,
+        name: u8aToString(asset.name),
+        symbol: u8aToString(asset.symbol).replace(/[^a-zA-Z0-9]/g, ""),
+      };
+    };
+
+    const result = lpList.map(([assetId1, assetId2]) => {
+      const asset1 = getAssetInfo(assetId1);
+      const asset2 = getAssetInfo(assetId2);
+      return {
+        asset1,
+        asset2,
+        key: `${assetId1.assetId}-${assetId2.assetId}`,
+      };
+    });
+
+    console.log("pools", result);
+    return result;
   },
   enabled: !!get(lpProgramAtom),
 }));
 
 export const assetsInfoAtom = atomWithQuery((get) => {
-  const { data: poolList, isFetched } = get(poolListAtom);
-  const program = get(lpProgramAtom);
-  const assetIds = [
-    ...new Set(
-      poolList?.flatMap(([assetId1, assetId2]) => [assetId1, assetId2])
-    ),
-  ];
+  const { data: poolList } = get(poolListAtom);
 
   return {
-    queryKey: ["assetsInfo", assetIds],
-    queryFn: async (): Promise<
-      {
-        assetId: string;
-        decimals: number;
-        name: string;
-        symbol: string;
-      }[]
-    > => {
-      if (!program) throw new Error("Program not initialized");
-      const result = await Promise.all(
-        assetIds!
-          .filter((assetId) => assetId !== "0x040d000000")
-          .map(async (assetId) => {
-            // console.log("assetId1", assetId);
+    queryKey: ["assetsInfo"],
+    queryFn: async () => {
+      const assetsInfo =
+        poolList?.flatMap((pool) => [pool.asset1, pool.asset2]) ?? [];
+      const uniqueAssetsInfo: AssetInfo[] = [];
 
-            const res = await program.executeQuery<Option<Codec>>(
-              "entrypoint_asset_info",
-              undefined,
-              [assetId]
-            );
+      for (const asset of assetsInfo) {
+        if (!uniqueAssetsInfo.some((a) => a.assetId === asset.assetId)) {
+          uniqueAssetsInfo.push(asset);
+        }
+      }
 
-            if (res.isEmpty) return null;
-
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const asset: any = res.unwrap();
-            const [, name] = compactStripLength(asset.name);
-            const [, symbol] = compactStripLength(asset.symbol);
-            return {
-              assetId: asset.assetId.toHex() as string,
-              decimals: asset.decimals.toNumber() as number,
-              name: u8aToString(name),
-              symbol: u8aToString(symbol),
-            };
-          })
-      );
-
-      return result
-        .concat({
-          assetId: "0x040d000000",
-          decimals: 10,
-          name: "lcDOT",
-          symbol: "lcDOT",
-        })
-        .filter(Boolean) as {
-        assetId: string;
-        decimals: number;
-        name: string;
-        symbol: string;
-      }[];
+      return uniqueAssetsInfo;
     },
-    enabled: isFetched && !!program,
+    enabled: !!poolList,
   };
 });
 
 export const assetsInfoFamily = atomFamily((id: string) =>
   atom((get) => {
     const { data: assetsInfo } = get(assetsInfoAtom);
-
     return assetsInfo?.find((asset) => asset.assetId === id);
   })
 );
 
-export const poolListDetailAtom = atomWithQuery((get) => {
-  const { data: poolList, isFetched: isPoolListFetched } = get(poolListAtom);
-  const { data: assetsInfo, isFetched: isAssetsInfoFetched } =
-    get(assetsInfoAtom);
-
-  return {
-    queryKey: ["poolListDetail"],
-    queryFn: async () => {
-      console.log("poolList", poolList, isPoolListFetched, isAssetsInfoFetched);
-      return poolList?.map(([assetId1, assetId2]) => {
-        const asset1 = assetsInfo?.find((asset) => asset.assetId === assetId1);
-        const asset2 = assetsInfo?.find((asset) => asset.assetId === assetId2);
-        return {
-          asset1: asset1!,
-          asset2: asset2!,
-          key: `${assetId1}-${assetId2}`,
-        };
-      });
-    },
-    enabled: isPoolListFetched && isAssetsInfoFetched,
-  };
-});
-
 export const selectedPoolAtom = atom<string | null>(null);
 export const selectedPoolInfoAtom = atom((get) => {
   const selectedPool = get(selectedPoolAtom);
-  const { data: poolListDetail } = get(poolListDetailAtom);
-  return poolListDetail?.find((pool) => pool.key === selectedPool);
+  const { data: poolList } = get(poolListAtom);
+  return poolList?.find((pool) => pool.key === selectedPool);
 });
 
 export const poolSizeAtom = atomWithQuery((get) => {
@@ -151,7 +117,16 @@ export const poolSizeAtom = atomWithQuery((get) => {
         undefined,
         [selectedPool.asset1.assetId, selectedPool.asset2.assetId]
       );
-      if (poolSize.isEmpty) return;
+      if (poolSize.isEmpty)
+        return {
+          size: [BigInt(0), BigInt(0)],
+          asset1: selectedPool.asset1,
+          asset2: selectedPool.asset2,
+          asset1Amount: "0",
+          asset2Amount: "0",
+          price: 0,
+        };
+
       const [asset1Amount, asset2Amount] = poolSize.unwrap();
       const asset1AmountFormatted = formatUnits(
         asset1Amount.toBigInt(),
@@ -178,74 +153,58 @@ export const poolSizeAtom = atomWithQuery((get) => {
   };
 });
 
-export const getQuoteAmountAtom = atom((get) => {
+export const getExactAmountOutAtom = atom((get) => {
   const program = get(lpProgramAtom);
 
-  return async (baseToken: string, quoteToken: string, baseAmount: string) => {
+  return async (sellToken: string, buyToken: string, sellAmount: string) => {
     if (!program) throw new Error("Program not initialized");
 
-    const quoteTokenDecimals = get(assetsInfoFamily(quoteToken))?.decimals;
-    const baseTokenDecimals = get(assetsInfoFamily(baseToken))?.decimals;
-    if (!quoteTokenDecimals || !baseTokenDecimals)
-      throw new Error("quoteTokenDecimals or baseTokenDecimals is not set");
+    const sellTokenDecimals = get(assetsInfoFamily(sellToken))?.decimals;
+    const buyTokenDecimals = get(assetsInfoFamily(buyToken))?.decimals;
+    if (sellTokenDecimals === undefined || buyTokenDecimals === undefined)
+      throw new Error("sellTokenDecimals or buyTokenDecimals is not set");
 
-    const quoteAmount = await program.executeQuery<Option<u128>>(
+    const buyAmount = await program.executeQuery<Option<u128>>(
       "entrypoint_quote_price_exact_tokens_for_tokens",
       undefined,
-      [baseToken, quoteToken, parseUnits(baseAmount, baseTokenDecimals)]
+      [sellToken, buyToken, parseUnits(sellAmount, sellTokenDecimals)]
     );
 
-    console.log(
-      `Get ${quoteToken} amount:`,
-      baseToken,
-      quoteToken,
-      baseAmount,
-      quoteAmount.toHuman()
-    );
-
-    if (quoteAmount.isEmpty) return "0";
+    if (buyAmount.isEmpty) return "0";
     return formatUnits(
-      quoteAmount.unwrap().toBigInt() as bigint,
-      quoteTokenDecimals
+      buyAmount.unwrap().toBigInt() as bigint,
+      buyTokenDecimals
     );
   };
 });
 
-export const getBaseAmountAtom = atom((get) => {
+export const getExactAmountInAtom = atom((get) => {
   const program = get(lpProgramAtom);
 
-  return async (baseToken: string, quoteToken: string, quoteAmount: string) => {
+  return async (sellToken: string, buyToken: string, buyAmount: string) => {
     if (!program) throw new Error("Program not initialized");
 
-    const quoteTokenDecimals = get(assetsInfoFamily(quoteToken))?.decimals;
-    const baseTokenDecimals = get(assetsInfoFamily(baseToken))?.decimals;
-    if (!quoteTokenDecimals || !baseTokenDecimals)
-      throw new Error("quoteTokenDecimals or baseTokenDecimals is not set");
+    const buyTokenDecimals = get(assetsInfoFamily(buyToken))?.decimals;
+    const sellTokenDecimals = get(assetsInfoFamily(sellToken))?.decimals;
+    if (buyTokenDecimals === undefined || sellTokenDecimals === undefined)
+      throw new Error("buyTokenDecimals or sellTokenDecimals is not set");
 
-    const baseAmount = await program.executeQuery<Option<u128>>(
+    const sellAmount = await program.executeQuery<Option<u128>>(
       "entrypoint_quote_price_tokens_for_exact_tokens",
       undefined,
-      [baseToken, quoteToken, parseUnits(quoteAmount, quoteTokenDecimals)]
+      [sellToken, buyToken, parseUnits(buyAmount, buyTokenDecimals)]
     );
 
-    console.log(
-      `Get ${baseToken} amount:`,
-      baseToken,
-      quoteToken,
-      quoteAmount,
-      baseAmount.toHuman()
-    );
-
-    if (baseAmount.isEmpty) return "0";
+    if (sellAmount.isEmpty) return "0";
 
     return formatUnits(
-      baseAmount.unwrap().toBigInt() as bigint,
-      baseTokenDecimals
+      sellAmount.unwrap().toBigInt() as bigint,
+      sellTokenDecimals
     );
   };
 });
 
-export const getReceiveAmountAtom = atom((get) => {
+export const calcReceiveAmountAtom = atom((get) => {
   return async (
     sellToken: string,
     buyToken: string,
@@ -307,6 +266,23 @@ export const getReceiveAmountAtom = atom((get) => {
       if (dy >= reserveOut) return "Infinity"; // 超出池子
       const dx = (dy * reserveIn) / (reserveOut - dy);
       return formatUnits(dx, receiveDecimals);
+    }
+  };
+});
+
+export const getReceiveAmountAtom = atom((get) => {
+  return async (
+    sellToken: string,
+    buyToken: string,
+    amount: string,
+    isSell: boolean
+  ) => {
+    const getExactAmountOut = get(getExactAmountOutAtom);
+    const getExactAmountIn = get(getExactAmountInAtom);
+    if (isSell) {
+      return getExactAmountOut(sellToken, buyToken, amount);
+    } else {
+      return getExactAmountIn(sellToken, buyToken, amount);
     }
   };
 });

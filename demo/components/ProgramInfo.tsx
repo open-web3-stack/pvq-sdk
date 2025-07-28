@@ -12,7 +12,7 @@ export const ProgramInfo = () => {
           <Textarea
             readOnly
             className="break-all max-h-[160px]"
-            defaultValue={currentProgram?.data}
+            defaultValue={currentProgram?.data || ""}
           />
         </div>
       </div>
@@ -22,7 +22,7 @@ export const ProgramInfo = () => {
           <Textarea
             readOnly
             className="break-all max-h-[120px]"
-            defaultValue={JSON.stringify(currentProgram?.metadata)}
+            defaultValue={JSON.stringify(currentProgram?.metadata) || ""}
           />
         </div>
       </div>

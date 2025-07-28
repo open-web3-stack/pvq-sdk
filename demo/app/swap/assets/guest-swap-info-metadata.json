@@ -200,6 +200,27 @@
             }
           }
         }
+      },
+      {
+        "id": 11,
+        "type": {
+          "def": {
+            "sequence": {
+              "type": 12
+            }
+          }
+        }
+      },
+      {
+        "id": 12,
+        "type": {
+          "def": {
+            "tuple": [
+              10,
+              10
+            ]
+          }
+        }
       }
     ]
   },
@@ -352,17 +373,7 @@
     {
       "name": "entrypoint_list_pools",
       "inputs": [],
-      "output": 7
-    },
-    {
-      "name": "entrypoint_asset_info",
-      "inputs": [
-        {
-          "name": "asset",
-          "ty": 0
-        }
-      ],
-      "output": 9
+      "output": 11
     }
   ]
 }

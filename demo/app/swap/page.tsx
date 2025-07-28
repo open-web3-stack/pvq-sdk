@@ -1,6 +1,7 @@
 "use client";
 
 import { Connect } from "@/components/Connect";
+import { ImageWithFallback } from "@/components/ImageWithFallback";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -10,16 +11,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useQueryClient } from "@tanstack/react-query";
 import { useAtomValue, useSetAtom } from "jotai";
 import { ArrowDownUp } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import React, { useMemo, useTransition } from "react";
+import React, { useCallback, useMemo, useTransition } from "react";
 import {
   assetsInfoAtom,
   getReceiveAmountAtom,
-  poolListDetailAtom,
+  poolListAtom,
   poolSizeAtom,
   selectedPoolAtom,
   selectedPoolInfoAtom,
@@ -31,8 +32,9 @@ export default function SwapPage() {
   const selectedPoolInfo = useAtomValue(selectedPoolInfoAtom);
   const setSelectedPool = useSetAtom(selectedPoolAtom);
   const { data: assetInfo } = useAtomValue(assetsInfoAtom);
-  const { data: poolListDetail } = useAtomValue(poolListDetailAtom);
+  const { data: poolList } = useAtomValue(poolListAtom);
   const { data: poolSize } = useAtomValue(poolSizeAtom);
+  const queryClient = useQueryClient();
 
   const [sellValue, setSellValue] = React.useState("");
   const [buyValue, setBuyValue] = React.useState("");
@@ -47,9 +49,9 @@ export default function SwapPage() {
   const [, startTransition] = useTransition();
 
   const tokenPairOptions = useMemo(() => {
-    if (!assetInfo || !poolListDetail) return [];
+    if (!poolList) return [];
 
-    return poolListDetail.map(({ asset1, asset2, key }) => {
+    return poolList.map(({ asset1, asset2, key }) => {
       const token1 = asset1.assetId;
       const token2 = asset2.assetId;
       const symbol1 = asset1.symbol;
@@ -62,7 +64,7 @@ export default function SwapPage() {
         symbols: [symbol1, symbol2],
       };
     });
-  }, [poolListDetail, assetInfo]);
+  }, [poolList]);
 
   const [sellTokens, buyTokens] = useMemo(() => {
     const allTokens = assetInfo?.map((asset) => asset.assetId) ?? [];
@@ -72,7 +74,7 @@ export default function SwapPage() {
         allTokens,
         [
           ...new Set(
-            poolListDetail
+            poolList
               ?.filter(
                 ({ asset1, asset2 }) =>
                   asset1.assetId === sellToken || asset2.assetId === sellToken
@@ -87,7 +89,7 @@ export default function SwapPage() {
       return [
         [
           ...new Set(
-            poolListDetail
+            poolList
               ?.filter(
                 ({ asset1, asset2 }) =>
                   asset1.assetId === buyToken || asset2.assetId === buyToken
@@ -100,19 +102,29 @@ export default function SwapPage() {
       ];
 
     return [allTokens, allTokens];
-  }, [sellToken, buyToken, activeBox, poolListDetail, assetInfo]);
+  }, [sellToken, buyToken, activeBox, poolList, assetInfo]);
 
-  const handleChangeSelectedPool = (key: string) => {
-    setSelectedPool(key);
-    setSellToken(
-      poolListDetail?.find((pool) => pool.key === key)?.asset1.assetId || ""
-    );
-    setBuyToken(
-      poolListDetail?.find((pool) => pool.key === key)?.asset2.assetId || ""
-    );
-    setSellValue("");
-    setBuyValue("");
-  };
+  const handleChangeSelectedPool = useCallback(
+    (key: string) => {
+      setSelectedPool(key);
+      setSellToken(
+        poolList?.find((pool) => pool.key === key)?.asset1.assetId || ""
+      );
+      setBuyToken(
+        poolList?.find((pool) => pool.key === key)?.asset2.assetId || ""
+      );
+      setSellValue("");
+      setBuyValue("");
+    },
+    [
+      poolList,
+      setSelectedPool,
+      setSellToken,
+      setBuyToken,
+      setSellValue,
+      setBuyValue,
+    ]
+  );
 
   const handleSwitch = () => {
     if (!selectedPoolInfo) return;
@@ -141,24 +153,6 @@ export default function SwapPage() {
       .finally(() => {
         setIsSwapLoading(false);
       });
-
-    // if (nextBox === "sell") {
-    //   getReceiveAmount(
-    //     selectedPoolInfo.asset1.assetId,
-    //     selectedPoolInfo.asset2.assetId,
-    //     amount
-    //   ).then((v) => {
-    //     setBuyValue(v);
-    //   });
-    // } else {
-    //   getReceiveAmount(
-    //     selectedPoolInfo.asset1.assetId,
-    //     selectedPoolInfo.asset2.assetId,
-    //     amount
-    //   ).then((v) => {
-    //     setSellValue(v);
-    //   });
-    // }
   };
 
   const handleSellChange = (amount: string) => {
@@ -244,6 +238,11 @@ export default function SwapPage() {
     }
   };
 
+  const handleDisconnect = useCallback(() => {
+    handleChangeSelectedPool("");
+    queryClient.clear();
+  }, [queryClient, handleChangeSelectedPool]);
+
   return (
     <div>
       <header className="border-b">
@@ -267,36 +266,40 @@ export default function SwapPage() {
         <CardContent>
           <div className="flex">
             <div className="flex-1 px-4">
-              <Connect className="mt-2" />
+              <Connect className="mt-2" onDisconnect={handleDisconnect} />
               <div className="mt-8 flex flex-col gap-4">
                 {/* Token Pair Selector */}
                 <div>
                   <div className="font-bold mb-2">Select Liquidity Pool</div>
                   <Select
-                    value={selectedPoolInfo?.key}
+                    value={selectedPoolInfo?.key || ""}
                     onValueChange={handleChangeSelectedPool}
                     disabled={!assetInfo || !tokenPairOptions.length}
                   >
                     <SelectTrigger className="w-full h-12! text-md">
                       <SelectValue placeholder="Select a token pair" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent scrollAble>
                       {tokenPairOptions.map((option) => (
                         <SelectItem key={option.key} value={option.key}>
                           <div className="flex items-center gap-2 select-none">
                             <div className="flex items-center gap-0">
-                              <Image
+                              <ImageWithFallback
                                 className="w-5 h-5 inline-flex items-center justify-center align-middle"
                                 src={`https://resources.acala.network/tokens/${option.symbols[0].toUpperCase()}.png`}
                                 alt={option.symbols[0]}
+                                fallback={option.symbols[0]?.slice(0, 1)}
                                 width={20}
+                                fallbackClassName="rounded-full bg-blue-400 font-bold"
                                 height={20}
                               />
-                              <Image
+                              <ImageWithFallback
                                 className="ml-[-8px] w-5 h-5 inline-flex items-center justify-center align-middle"
                                 src={`https://resources.acala.network/tokens/${option.symbols[1].toUpperCase()}.png`}
                                 alt={option.symbols[1]}
                                 width={20}
+                                fallback={option.symbols[1]?.slice(0, 1)}
+                                fallbackClassName="rounded-full bg-blue-400 font-bold"
                                 height={20}
                               />
                             </div>

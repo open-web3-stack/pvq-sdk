@@ -75,7 +75,7 @@ export const SelectProgram = ({ className }: { className?: string }) => {
         <Select
           open={selectOpen}
           onOpenChange={setSelectOpen}
-          value={currentProgram?.id}
+          value={currentProgram?.id || ""}
           onValueChange={(value) => setCurrentProgram(value)}
         >
           <SelectTrigger className="w-full h-12! text-md">

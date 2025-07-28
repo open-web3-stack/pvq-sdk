@@ -9,7 +9,13 @@ import { useCallback, useState } from "react";
 
 const defaultEndpoint = "ws://127.0.0.1:8000";
 
-export const Connect = ({ className }: { className?: string }) => {
+export const Connect = ({
+  className,
+  onDisconnect,
+}: {
+  className?: string;
+  onDisconnect?: () => void;
+}) => {
   const [api, setApi] = useAtom(apiAtom);
   const [connecting, setConnecting] = useAtom(apiConnectingAtom);
   const [value, setValue] = useState("");
@@ -54,8 +60,9 @@ export const Connect = ({ className }: { className?: string }) => {
       api.disconnect();
       setApi(null);
       setConnecting(false);
+      onDisconnect?.();
     }
-  }, [api, setApi, setConnecting]);
+  }, [api, setApi, setConnecting, onDisconnect]);
 
   return (
     <div className={cn(className, "select-none")}>
