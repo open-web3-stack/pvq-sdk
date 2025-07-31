@@ -1,6 +1,6 @@
 "use client";
 
-import { Connect } from "@/components/Connect";
+import { NetworkSelector } from "@/components/NetworkSelector";
 import { ImageWithFallback } from "@/components/ImageWithFallback";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -266,7 +266,7 @@ export default function SwapPage() {
         <CardContent>
           <div className="flex">
             <div className="flex-1 px-4">
-              <Connect className="mt-2" onDisconnect={handleDisconnect} />
+              <NetworkSelector className="mt-2" onDisconnect={handleDisconnect} />
               <div className="mt-8 flex flex-col gap-4">
                 {/* Token Pair Selector */}
                 <div>

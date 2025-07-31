@@ -23,54 +23,58 @@ export const lpProgramAtom = atom<PvqProgram | null>((get) => {
   return new PvqProgram(api, guestSwapInfoProgram as `0x${string}`, metadata);
 });
 
-export const poolListAtom = atomWithQuery((get) => ({
-  queryKey: ["poolList"],
-  onError: (error: Error) => {
-    console.error("Error fetching pool list", error.message);
-  },
-  throwOnError: true,
-  retry: false,
-  queryFn: async () => {
-    console.log("fetching pool list");
-    const program = get(lpProgramAtom);
-    if (!program) throw new Error("Program not initialized");
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const lpList = await program.executeQuery<Vec<ITuple<[any, any]>>>(
-      "entrypoint_list_pools",
-      undefined,
-      []
-    );
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const getAssetInfo = (asset: any): AssetInfo => {
-      return {
-        assetId: asset.assetId.toHex() as string,
-        decimals: asset.decimals.toNumber() as number,
-        name: u8aToString(asset.name),
-        symbol: u8aToString(asset.symbol).replace(/[^a-zA-Z0-9]/g, ""),
+export const poolListAtom = atomWithQuery((get) => {
+  const api = get(apiAtom);
+  return {
+    queryKey: ["poolList", api?.genesisHash.toHex()],
+    onError: (error: Error) => {
+      console.error("Error fetching pool list", error.message);
+    },
+    throwOnError: true,
+    retry: false,
+    queryFn: async () => {
+      console.log("fetching pool list");
+      const program = get(lpProgramAtom);
+      if (!program) throw new Error("Program not initialized");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const lpList = await program.executeQuery<Vec<ITuple<[any, any]>>>(
+        "entrypoint_list_pools",
+        undefined,
+        []
+      );
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const getAssetInfo = (asset: any): AssetInfo => {
+        return {
+          assetId: asset.assetId.toHex() as string,
+          decimals: asset.decimals.toNumber() as number,
+          name: u8aToString(asset.name),
+          symbol: u8aToString(asset.symbol).replace(/[^a-zA-Z0-9]/g, ""),
+        };
       };
-    };
 
-    const result = lpList.map(([assetId1, assetId2]) => {
-      const asset1 = getAssetInfo(assetId1);
-      const asset2 = getAssetInfo(assetId2);
-      return {
-        asset1,
-        asset2,
-        key: `${assetId1.assetId}-${assetId2.assetId}`,
-      };
-    });
+      const result = lpList.map(([assetId1, assetId2]) => {
+        const asset1 = getAssetInfo(assetId1);
+        const asset2 = getAssetInfo(assetId2);
+        return {
+          asset1,
+          asset2,
+          key: `${assetId1.assetId}-${assetId2.assetId}`,
+        };
+      });
 
-    console.log("pools", result);
-    return result;
-  },
-  enabled: !!get(lpProgramAtom),
-}));
+      console.log("pools", result);
+      return result;
+    },
+    enabled: !!get(lpProgramAtom),
+  };
+});
 
 export const assetsInfoAtom = atomWithQuery((get) => {
   const { data: poolList } = get(poolListAtom);
+  const api = get(apiAtom);
 
   return {
-    queryKey: ["assetsInfo"],
+    queryKey: ["assetsInfo", api?.genesisHash.toHex()],
     queryFn: async () => {
       const assetsInfo =
         poolList?.flatMap((pool) => [pool.asset1, pool.asset2]) ?? [];
