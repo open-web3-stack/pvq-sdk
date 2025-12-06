@@ -15,6 +15,10 @@ import { useCallback, useState } from "react";
 
 const NETWORKS = [
   {
+    name: "Local",
+    endpoint: "ws://127.0.0.1:8000",
+  },
+  {
     name: "Acala",
     endpoint: "wss://pvq-mandala.aca-staging.network",
   },
